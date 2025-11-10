@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Droplet, Menu, X, Phone, Clock } from 'lucide-react';
+import { Droplet, Menu, X, Phone, Clock, Home, History, User } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,12 +17,13 @@ export default function NavBar() {
   }, []);
 
   const navLinks = [
-    { href: '#home', label: 'Home' },
-    { href: '#services', label: 'Services' },
-    { href: '#pricing', label: 'Pricing' },
-    { href: '#about', label: 'About' },
-    { href: '#contact', label: 'Contact' }
+    { path: '/', label: 'Home', icon: Home },
+    { path: '/Details', label: 'Services', icon: Droplet },
+    { path: '/History', label: 'History', icon: History },
+    { path: '/Profile', label: 'Profile', icon: User }
   ];
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${
@@ -29,7 +33,10 @@ export default function NavBar() {
         <div className="flex justify-between items-center">
           
           {/* Logo Section */}
-          <div className="flex items-center space-x-3 group cursor-pointer">
+          <div 
+            className="flex items-center space-x-3 group cursor-pointer"
+            onClick={() => navigate('/')}
+          >
             <div className="relative">
               <div className="absolute inset-0 bg-blue-400 rounded-full blur-sm group-hover:blur-md transition-all duration-300 opacity-50"></div>
               <div className="relative bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-full">
@@ -46,16 +53,27 @@ export default function NavBar() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-1">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="px-4 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all duration-200 relative group"
-              >
-                {link.label}
-                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-600 group-hover:w-3/4 transition-all duration-300"></span>
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              const active = isActive(link.path);
+              return (
+                <button
+                  key={link.path}
+                  onClick={() => navigate(link.path)}
+                  className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 relative group ${
+                    active 
+                      ? 'text-blue-600 bg-blue-50' 
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${active ? 'text-blue-600' : 'text-gray-500'} group-hover:text-blue-600 transition-colors`} />
+                  <span>{link.label}</span>
+                  <span className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 bg-blue-600 transition-all duration-300 ${
+                    active ? 'w-3/4' : 'w-0 group-hover:w-3/4'
+                  }`}></span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Right Section - Contact Info & CTA */}
@@ -70,9 +88,10 @@ export default function NavBar() {
             </div>
             <a
               href="#book"
-              className="ml-4 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-600 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-xl"
+              className="ml-4 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-600 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-xl relative overflow-hidden group"
             >
-              Book Now
+              <span className="relative z-10">Book Now</span>
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
             </a>
           </div>
 
@@ -88,19 +107,33 @@ export default function NavBar() {
 
       {/* Mobile Menu */}
       <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-        isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
       }`}>
         <div className="px-4 pt-2 pb-4 bg-gradient-to-b from-white to-blue-50/30 space-y-1">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setIsOpen(false)}
-              className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-white hover:text-blue-600 hover:shadow-sm font-medium transition-all duration-200"
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            const active = isActive(link.path);
+            return (
+              <button
+                key={link.path}
+                onClick={() => {
+                  navigate(link.path);
+                  setIsOpen(false);
+                }}
+                className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  active 
+                    ? 'bg-blue-600 text-white shadow-md' 
+                    : 'text-gray-700 hover:bg-white hover:text-blue-600 hover:shadow-sm'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-gray-500'}`} />
+                <span>{link.label}</span>
+                {active && (
+                  <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                )}
+              </button>
+            );
+          })}
           <div className="pt-4 space-y-3 border-t border-blue-100 mt-2">
             <div className="flex items-center space-x-2 px-4 text-sm text-gray-600">
               <Clock className="w-4 h-4 text-blue-600" />
@@ -113,16 +146,14 @@ export default function NavBar() {
             <a
               href="#book"
               onClick={() => setIsOpen(false)}
-              className="block mx-4 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-lg text-center hover:from-blue-700 hover:to-blue-600 transition-all duration-200 shadow-md"
+              className="block mx-4 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-lg text-center hover:from-blue-700 hover:to-blue-600 transition-all duration-200 shadow-md relative overflow-hidden group"
             >
-              Book Now
+              <span className="relative z-10">Book Now</span>
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
             </a>
           </div>
         </div>
       </div>
-
-      {/* Demo Content Spacer */}
-      
     </nav>
   );
 }

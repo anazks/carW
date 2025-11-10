@@ -92,7 +92,7 @@ export default function Card() {
       if (!ref.current) return;
       const interval = setInterval(() => {
         if (ref.current) {
-          const scrollAmount = ref.current.offsetWidth + 24; // account for gap-6 (1.5rem = 24px)
+          const scrollAmount = ref.current.offsetWidth + 24;
           ref.current.scrollLeft += scrollAmount;
           if (ref.current.scrollLeft >= ref.current.scrollWidth - ref.current.offsetWidth) {
             ref.current.scrollLeft = 0;
@@ -150,46 +150,46 @@ export default function Card() {
                 <div className="bg-white shadow-lg overflow-hidden">
                   {/* Image/Gradient Header */}
                   <div 
-                    className="aspect-square relative"
+                    className="h-40 relative"
                     style={{ background: center.image }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                     
                     {/* Distance Badge */}
-                    <div className="absolute top-4 right-4 bg-white/90 px-3 py-1.5 rounded-full flex items-center space-x-1">
-                      <Navigation className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm font-semibold text-gray-900">{center.distance}</span>
+                    <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full flex items-center space-x-1">
+                      <Navigation className="w-3 h-3 text-blue-600" />
+                      <span className="text-xs font-semibold text-gray-900">{center.distance}</span>
                     </div>
 
                     {/* Rating Badge */}
-                    <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-1.5 rounded-full flex items-center space-x-1">
-                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      <span className="text-sm font-bold text-gray-900">{center.rating}</span>
+                    <div className="absolute bottom-2 left-2 bg-white/90 px-2 py-1 rounded-full flex items-center space-x-1">
+                      <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                      <span className="text-xs font-bold text-gray-900">{center.rating}</span>
                       <span className="text-xs text-gray-600">({center.reviews})</span>
                     </div>
                   </div>
 
                   {/* Card Content */}
-                  <div className="p-4 space-y-3">
+                  <div className="p-3 space-y-2">
                     
                     {/* Title */}
-                    <h3 className="text-lg font-bold text-gray-900">
+                    <h3 className="text-base font-bold text-gray-900">
                       {center.name}
                     </h3>
 
                     {/* Opening Time */}
                     <div className="flex items-center space-x-2 text-gray-600">
-                      <Clock className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                      <span className="text-sm font-medium">{center.hours}</span>
+                      <Clock className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                      <span className="text-xs font-medium">{center.hours}</span>
                     </div>
 
                     {/* Price & CTA */}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Starting from</p>
-                        <p className="text-lg font-bold text-blue-600">{center.price}</p>
+                        <p className="text-xs text-gray-500 mb-0.5">Starting from</p>
+                        <p className="text-base font-bold text-blue-600">{center.price}</p>
                       </div>
-                      <button className="px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded hover:bg-blue-700">
+                      <button className="px-3 py-1.5 bg-blue-600 text-white font-semibold text-xs rounded hover:bg-blue-700">
                         Book Now
                       </button>
                     </div>
@@ -206,46 +206,46 @@ export default function Card() {
                 <div className="bg-white shadow-lg overflow-hidden">
                   {/* Image/Gradient Header */}
                   <div 
-                    className="aspect-square relative"
+                    className="h-40 relative"
                     style={{ background: center.image }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                     
                     {/* Distance Badge */}
-                    <div className="absolute top-4 right-4 bg-white/90 px-3 py-1.5 rounded-full flex items-center space-x-1">
-                      <Navigation className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm font-semibold text-gray-900">{center.distance}</span>
+                    <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full flex items-center space-x-1">
+                      <Navigation className="w-3 h-3 text-blue-600" />
+                      <span className="text-xs font-semibold text-gray-900">{center.distance}</span>
                     </div>
 
                     {/* Rating Badge */}
-                    <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-1.5 rounded-full flex items-center space-x-1">
-                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      <span className="text-sm font-bold text-gray-900">{center.rating}</span>
+                    <div className="absolute bottom-2 left-2 bg-white/90 px-2 py-1 rounded-full flex items-center space-x-1">
+                      <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                      <span className="text-xs font-bold text-gray-900">{center.rating}</span>
                       <span className="text-xs text-gray-600">({center.reviews})</span>
                     </div>
                   </div>
 
                   {/* Card Content */}
-                  <div className="p-4 space-y-3">
+                  <div className="p-3 space-y-2">
                     
                     {/* Title */}
-                    <h3 className="text-lg font-bold text-gray-900">
+                    <h3 className="text-base font-bold text-gray-900">
                       {center.name}
                     </h3>
 
                     {/* Opening Time */}
                     <div className="flex items-center space-x-2 text-gray-600">
-                      <Clock className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                      <span className="text-sm font-medium">{center.hours}</span>
+                      <Clock className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                      <span className="text-xs font-medium">{center.hours}</span>
                     </div>
 
                     {/* Price & CTA */}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Starting from</p>
-                        <p className="text-lg font-bold text-blue-600">{center.price}</p>
+                        <p className="text-xs text-gray-500 mb-0.5">Starting from</p>
+                        <p className="text-base font-bold text-blue-600">{center.price}</p>
                       </div>
-                      <button className="px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded hover:bg-blue-700">
+                      <button className="px-3 py-1.5 bg-blue-600 text-white font-semibold text-xs rounded hover:bg-blue-700">
                         Book Now
                       </button>
                     </div>
@@ -276,31 +276,6 @@ export default function Card() {
   return (
     <div className="bg-gradient-to-b from-white via-blue-50 to-indigo-100 min-h-screen py-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Section Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent mb-4">
-            Find Your Nearest Car Wash
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Discover top-rated car wash centers with easy booking and transparent pricing.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
-            <div className="relative w-full sm:w-auto">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search locations..."
-                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              />
-            </div>
-            <button className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700">
-              <Filter className="w-4 h-4 mr-2" />
-              Filters
-            </button>
-          </div>
-        </div>
-        
         {renderSection('Near You', nearYou, nearRef)}
         {renderSection('Most Popular', mostPopular, popRef)}
         {renderSection('Suggested', suggested, sugRef)}
@@ -314,4 +289,4 @@ export default function Card() {
       </div>
     </div>
   );
-}``
+}
