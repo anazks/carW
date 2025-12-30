@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Droplet, Menu, X,Home, History, User } from 'lucide-react';
+import { Droplet, Menu, X, Home, History, User } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function NavBar() {
@@ -23,7 +23,7 @@ export default function NavBar() {
     { path: '/Profile', label: 'Profile', icon: User }
   ];
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${
