@@ -24,7 +24,7 @@ interface CarWashCenter {
 
 const dummyCenter: CarWashCenter = {
   id: 1,
-  name: "CleanRide Downtown",
+  name: "Mycarwash Downtown",
   location: "123 Main Street, Downtown",
   rating: 4.8,
   reviews: 245,
@@ -33,7 +33,7 @@ const dummyCenter: CarWashCenter = {
   distance: "2.3 km",
   services: ["Express Wash", "Full Detail", "Interior Clean", "Wax & Polish"],
   price: "₹150 - ₹500",
-  image: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+  image: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)",
   capacity: 5,
   totalTime: "30-45 minutes",
   selectedSlot: "2:00 PM - 2:30 PM",
@@ -79,20 +79,20 @@ export default function Detailed({ center = dummyCenter }: DetailedProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 py-8 pt-24">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50/30 py-8 pt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
-        <button className="mb-6 flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors group">
+        <button className="mb-6 flex items-center space-x-2 text-gray-600 hover:text-green-600 transition-colors group">
           <svg className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           <span className="font-medium">Back to locations</span>
         </button>
 
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+        <div className="bg-white rounded-3xl overflow-hidden">
           <div className="grid lg:grid-cols-2 gap-0">
             {/* Left: Shop Image */}
-            <div className="relative h-96 lg:h-auto min-h-[500px]">
+            <div className="relative h-80 lg:h-auto min-h-[400px]">
               <div 
                 className="absolute inset-0"
                 style={{ background: center.image }}
@@ -104,33 +104,33 @@ export default function Detailed({ center = dummyCenter }: DetailedProps) {
               <div className="absolute inset-0 p-6 flex flex-col justify-between">
                 <div className="flex justify-between items-start">
                   {/* Rating Badge */}
-                  <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full flex items-center space-x-2 shadow-lg">
+                  <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full flex items-center space-x-2">
                     <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
                     <span className="text-lg font-bold text-gray-900">{center.rating}</span>
                     <span className="text-sm text-gray-600">({center.reviews} reviews)</span>
                   </div>
 
                   {/* Distance Badge */}
-                  <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full flex items-center space-x-2 shadow-lg">
-                    <MapPin className="w-5 h-5 text-blue-600" />
+                  <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full flex items-center space-x-2">
+                    <MapPin className="w-5 h-5 text-green-600" />
                     <span className="text-sm font-semibold text-gray-900">{center.distance}</span>
                   </div>
                 </div>
 
                 {/* Bottom Info */}
                 <div className="space-y-3">
-                  <div className="bg-white/95 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-lg">
+                  <div className="bg-white/95 backdrop-blur-sm px-4 py-3 rounded-2xl">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-gray-600 font-medium">Available Now</span>
                       <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
-                        <Users className="w-4 h-4 text-blue-600" />
+                        <Users className="w-4 h-4 text-green-600" />
                         <span className="text-gray-900 font-semibold">{center.capacity} slots free</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-blue-600" />
+                        <Clock className="w-4 h-4 text-green-600" />
                         <span className="text-gray-900 font-semibold">{center.totalTime}</span>
                       </div>
                     </div>
@@ -146,21 +146,21 @@ export default function Detailed({ center = dummyCenter }: DetailedProps) {
                 <h1 className="text-4xl font-bold text-gray-900 leading-tight">{center.name}</h1>
                 
                 <div className="flex items-start space-x-2 text-gray-600">
-                  <MapPin className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <MapPin className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <span className="text-base">{center.location}</span>
                 </div>
 
                 {/* Contact Info Cards */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-xl">
-                    <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    <Clock className="w-5 h-5 text-green-600 flex-shrink-0" />
                     <div className="min-w-0">
                       <p className="text-xs text-gray-500">Hours</p>
                       <p className="text-sm font-semibold text-gray-900 truncate">{center.hours}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-xl">
-                    <Phone className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    <Phone className="w-5 h-5 text-green-600 flex-shrink-0" />
                     <div className="min-w-0">
                       <p className="text-xs text-gray-500">Phone</p>
                       <p className="text-sm font-semibold text-gray-900 truncate">{center.phone}</p>
@@ -185,15 +185,15 @@ export default function Detailed({ center = dummyCenter }: DetailedProps) {
                         disabled={!isAvailable}
                         className={`relative p-4 rounded-xl border-2 transition-all duration-200 ${
                           isSelected
-                            ? 'border-blue-600 bg-blue-50 shadow-md'
+                            ? 'border-green-600 bg-green-50'
                             : isAvailable
-                            ? 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                            ? 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
                             : 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
                         }`}
                       >
                         <div className="flex flex-col items-center space-y-2">
                           <div className={`p-2 rounded-lg ${
-                            isSelected ? 'bg-blue-600' : 'bg-gray-200'
+                            isSelected ? 'bg-green-600' : 'bg-gray-200'
                           }`}>
                             <Icon className={`w-5 h-5 ${
                               isSelected ? 'text-white' : 'text-gray-600'
@@ -201,7 +201,7 @@ export default function Detailed({ center = dummyCenter }: DetailedProps) {
                           </div>
                           <div className="text-center">
                             <p className={`text-sm font-semibold ${
-                              isSelected ? 'text-blue-600' : 'text-gray-900'
+                              isSelected ? 'text-green-600' : 'text-gray-900'
                             }`}>
                               {option.label}
                             </p>
@@ -214,7 +214,7 @@ export default function Detailed({ center = dummyCenter }: DetailedProps) {
                           </div>
                         </div>
                         {isSelected && (
-                          <div className="absolute -top-2 -right-2 bg-blue-600 rounded-full p-1">
+                          <div className="absolute -top-2 -right-2 bg-green-600 rounded-full p-1">
                             <Check className="w-3 h-3 text-white" />
                           </div>
                         )}
@@ -236,7 +236,7 @@ export default function Detailed({ center = dummyCenter }: DetailedProps) {
                   {center.services.map((service, idx) => (
                     <span
                       key={idx}
-                      className="px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 text-sm font-medium rounded-full border border-blue-200 hover:shadow-md transition-shadow"
+                      className="px-4 py-2 bg-gradient-to-r from-green-50 to-green-100 text-green-700 text-sm font-medium rounded-full border border-green-200 hover:shadow-md transition-shadow"
                     >
                       {service}
                     </span>
@@ -258,20 +258,20 @@ export default function Detailed({ center = dummyCenter }: DetailedProps) {
               </div>
 
               {/* Selected Slot */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-200">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-xl border border-green-200">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Your Selected Slot</p>
-                    <p className="text-xl font-bold text-blue-600">{selectedSlot}</p>
+                    <p className="text-xl font-bold text-green-600">{selectedSlot}</p>
                   </div>
-                  <button className="text-sm text-blue-600 hover:text-blue-700 font-medium underline">
+                  <button className="text-sm text-green-600 hover:text-green-700 font-medium underline">
                     Change
                   </button>
                 </div>
               </div>
 
               {/* Book Now Button */}
-              <button className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-lg rounded-xl hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] transition-all shadow-lg hover:shadow-xl relative overflow-hidden group">
+              <button className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold text-lg rounded-xl hover:from-green-700 hover:to-green-800 transform hover:scale-[1.02] transition-all relative overflow-hidden group">
                 <span className="relative z-10">Confirm Booking</span>
                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
               </button>

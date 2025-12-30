@@ -10,7 +10,7 @@ export default function Card() {
   const carWashCenters = [
     {
       id: 1,
-      name: "CleanRide Downtown",
+      name: "Mycarwash Downtown",
       location: "123 Main Street, Downtown",
       rating: 4.8,
       reviews: 245,
@@ -19,11 +19,11 @@ export default function Card() {
       distance: "2.3 km",
       services: ["Express Wash", "Full Detail", "Interior Clean"],
       price: "₹150 - ₹500",
-      image: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+      image: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)"
     },
     {
       id: 2,
-      name: "CleanRide Uptown",
+      name: "Mycarwash Uptown",
       location: "456 Oak Avenue, Uptown",
       rating: 4.9,
       reviews: 312,
@@ -32,11 +32,11 @@ export default function Card() {
       distance: "3.7 km",
       services: ["Premium Wash", "Wax & Polish", "Engine Clean"],
       price: "₹200 - ₹750",
-      image: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+      image: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
     },
     {
       id: 3,
-      name: "CleanRide Westside",
+      name: "Mycarwash Westside",
       location: "789 Pine Road, Westside",
       rating: 4.7,
       reviews: 189,
@@ -45,11 +45,11 @@ export default function Card() {
       distance: "5.1 km",
       services: ["Basic Wash", "Vacuum", "Tire Shine"],
       price: "₹120 - ₹400",
-      image: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+      image: "linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
     },
     {
       id: 4,
-      name: "CleanRide Eastside",
+      name: "Mycarwash Eastside",
       location: "101 Elm Boulevard, Eastside",
       rating: 4.6,
       reviews: 156,
@@ -58,11 +58,11 @@ export default function Card() {
       distance: "1.8 km",
       services: ["Quick Rinse", "Exterior Polish", "Wheel Clean"],
       price: "₹100 - ₹350",
-      image: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+      image: "linear-gradient(135deg, #86efac 0%, #4ade80 100%)"
     },
     {
       id: 5,
-      name: "CleanRide North End",
+      name: "Mycarwash North End",
       location: "202 Cedar Lane, North End",
       rating: 4.9,
       reviews: 401,
@@ -71,7 +71,7 @@ export default function Card() {
       distance: "4.2 km",
       services: ["Deluxe Package", "UV Protection", "Leather Care"],
       price: "₹250 - ₹800",
-      image: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+      image: "linear-gradient(135deg, #dcfce7 0%, #86efac 100%)"
     }
   ];
 
@@ -157,7 +157,7 @@ export default function Card() {
                     
                     {/* Distance Badge */}
                     <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full flex items-center space-x-1">
-                      <Navigation className="w-3 h-3 text-blue-600" />
+                      <Navigation className="w-3 h-3 text-green-600" />
                       <span className="text-xs font-semibold text-gray-900">{center.distance}</span>
                     </div>
 
@@ -179,7 +179,7 @@ export default function Card() {
 
                     {/* Opening Time */}
                     <div className="flex items-center space-x-2 text-gray-600">
-                      <Clock className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                      <Clock className="w-3 h-3 text-green-600 flex-shrink-0" />
                       <span className="text-xs font-medium">{center.hours}</span>
                     </div>
 
@@ -187,9 +187,9 @@ export default function Card() {
                     <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                       <div>
                         <p className="text-xs text-gray-500 mb-0.5">Starting from</p>
-                        <p className="text-base font-bold text-blue-600">{center.price}</p>
+                        <p className="text-base font-bold text-green-600">{center.price}</p>
                       </div>
-                      <button className="px-3 py-1.5 bg-blue-600 text-white font-semibold text-xs rounded hover:bg-blue-700">
+                      <button className="px-3 py-1.5 bg-green-600 text-white font-semibold text-xs rounded hover:bg-green-700">
                         Book Now
                       </button>
                     </div>
@@ -213,7 +213,7 @@ export default function Card() {
                     
                     {/* Distance Badge */}
                     <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full flex items-center space-x-1">
-                      <Navigation className="w-3 h-3 text-blue-600" />
+                      <Navigation className="w-3 h-3 text-green-600" />
                       <span className="text-xs font-semibold text-gray-900">{center.distance}</span>
                     </div>
 
@@ -235,7 +235,7 @@ export default function Card() {
 
                     {/* Opening Time */}
                     <div className="flex items-center space-x-2 text-gray-600">
-                      <Clock className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                      <Clock className="w-3 h-3 text-green-600 flex-shrink-0" />
                       <span className="text-xs font-medium">{center.hours}</span>
                     </div>
 
@@ -243,9 +243,9 @@ export default function Card() {
                     <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                       <div>
                         <p className="text-xs text-gray-500 mb-0.5">Starting from</p>
-                        <p className="text-base font-bold text-blue-600">{center.price}</p>
+                        <p className="text-base font-bold text-green-600">{center.price}</p>
                       </div>
-                      <button className="px-3 py-1.5 bg-blue-600 text-white font-semibold text-xs rounded hover:bg-blue-700">
+                      <button className="px-3 py-1.5 bg-green-600 text-white font-semibold text-xs rounded hover:bg-green-700">
                         Book Now
                       </button>
                     </div>
@@ -274,7 +274,7 @@ export default function Card() {
   };
 
   return (
-    <div className="bg-gradient-to-b from-white via-blue-50 to-indigo-100 min-h-screen py-16">
+    <div className="bg-gradient-to-b from-white via-green-50 to-emerald-100 min-h-screen py-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {renderSection('Near You', nearYou, nearRef)}
         {renderSection('Most Popular', mostPopular, popRef)}
@@ -282,7 +282,7 @@ export default function Card() {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <button className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700">
+          <button className="px-8 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700">
             View All Locations
           </button>
         </div>
