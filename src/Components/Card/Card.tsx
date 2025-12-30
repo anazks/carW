@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MapPin, Clock, Star, Phone, Navigation, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Clock, Star, Navigation, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Card() {
   const [isMobile, setIsMobile] = useState(false);
@@ -86,7 +86,7 @@ export default function Card() {
     if (!isMobile) return;
 
     const refs = [nearRef, popRef, sugRef];
-    const intervals: NodeJS.Timeout[] = [];
+    const intervals: number[] = [];
 
     refs.forEach((ref) => {
       if (!ref.current) return;
@@ -122,16 +122,16 @@ export default function Card() {
     (c) => !nearIds.has(c.id) && !popIds.has(c.id)
   );
 
-  const renderSection = (title: string, centers: typeof carWashCenters, sectionRef: React.RefObject<HTMLDivElement>) => {
+  const renderSection = (title: string, centers: typeof carWashCenters, sectionRef: React.RefObject<HTMLDivElement | null>) => {
     const scrollLeft = () => {
-      if (sectionRef.current) {
+      if (sectionRef?.current) {
         const scrollAmount = sectionRef.current.offsetWidth + 24;
         sectionRef.current.scrollLeft -= scrollAmount;
       }
     };
 
     const scrollRight = () => {
-      if (sectionRef.current) {
+      if (sectionRef?.current) {
         const scrollAmount = sectionRef.current.offsetWidth + 24;
         sectionRef.current.scrollLeft += scrollAmount;
         if (sectionRef.current.scrollLeft >= sectionRef.current.scrollWidth - sectionRef.current.offsetWidth) {

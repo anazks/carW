@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Droplet, Menu, X, Phone, Clock, Home, History, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Droplet, Menu, X,Home, History, User } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation(); 
 
   useEffect(() => {
     const handleScroll = () => {

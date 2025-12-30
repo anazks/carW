@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { User, Mail, Phone, Calendar, DollarSign, Settings, LogOut, Edit } from 'lucide-react';
 
 const dummyUser = {

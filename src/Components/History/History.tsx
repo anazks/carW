@@ -1,5 +1,5 @@
-import React from 'react';
-import { MapPin, Clock, Star, Phone, CheckCircle, XCircle, Clock as ClockIcon, Calendar } from 'lucide-react';
+
+import { MapPin, Clock,CheckCircle, XCircle, Clock as ClockIcon, Calendar } from 'lucide-react';
 
 interface Booking {
   id: number;
