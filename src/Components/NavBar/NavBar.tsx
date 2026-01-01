@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Droplet, Menu, X, Home, History, User } from 'lucide-react';
+import { Droplet, Menu, X, Home, History, User, LogIn, UserPlus } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function NavBar() {
@@ -24,6 +24,14 @@ export default function NavBar() {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
+  const handleRegister = () => {
+    navigate('/register');
+  };
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${
@@ -76,8 +84,16 @@ export default function NavBar() {
             })}
           </div>
 
-          {/* Right Section - CTA */}
-          <div className="hidden lg:flex items-center">
+          {/* Right Section - Login/Register & CTA */}
+          <div className="hidden lg:flex items-center space-x-2">
+            <button
+              onClick={handleLogin}
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
+            >
+              <LogIn className="w-4 h-4 inline mr-1" />
+              Login
+            </button>
+         
             <a
               href="#book"
               className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-600 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-xl relative overflow-hidden group"
@@ -126,6 +142,17 @@ export default function NavBar() {
               </button>
             );
           })}
+          <button
+            onClick={() => {
+              handleLogin();
+              setIsOpen(false);
+            }}
+            className="flex items-center space-x-3 w-full px-4 py-3 rounded-lg font-medium text-gray-700 hover:bg-white hover:text-green-600 hover:shadow-sm transition-all duration-200"
+          >
+            <LogIn className="w-5 h-5 text-gray-500" />
+            <span>Login</span>
+          </button>
+         
           <div className="pt-4 space-y-3 border-t border-green-100 mt-2">
             <a
               href="#book"
