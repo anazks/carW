@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { Droplet, Mail, ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true);
   const [step, setStep] = useState(1); // 1: email, 2: otp
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
 
@@ -14,8 +12,7 @@ export default function LoginPage() {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
-      
-      // Auto-focus next input
+
       if (value && index < 5) {
         document.getElementById(`otp-${index + 1}`)?.focus();
       }
@@ -29,9 +26,8 @@ export default function LoginPage() {
   };
 
   const handleSendOtp = () => {
-    if (!email || (!isLogin && !name)) return;
+    if (!email) return;
     setLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setLoading(false);
       setStep(2);
@@ -41,7 +37,6 @@ export default function LoginPage() {
   const handleVerifyOtp = () => {
     if (otp.some(d => !d)) return;
     setLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setLoading(false);
       alert('Login successful!');
@@ -50,7 +45,6 @@ export default function LoginPage() {
 
   const handleGoogleLogin = () => {
     setLoading(true);
-    // Simulate Google OAuth
     setTimeout(() => {
       setLoading(false);
       alert('Google login successful!');
@@ -60,92 +54,27 @@ export default function LoginPage() {
   const resetForm = () => {
     setStep(1);
     setEmail('');
-    setName('');
     setOtp(['', '', '', '', '', '']);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 flex items-center justify-center p-4">
-      {/* Background Decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute top-40 right-10 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-green-100 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-      </div>
-
+    <div
+      className="min-h-screen bg-gradient-to-br from-white via-[#FEF9F2] to-white flex items-center justify-center p-4 relative"
+      style={{ fontFamily: "'Bodoni Moda', serif" }}
+    >
       {/* Login Card */}
       <div className="relative w-full max-w-md">
-        <div className="bg-white rounded-2xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-green-600 to-green-500 p-8 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white opacity-10 rounded-full -mr-20 -mt-20"></div>
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white opacity-10 rounded-full -ml-16 -mb-16"></div>
-            
-            <div className="relative flex items-center justify-center space-x-3 mb-2">
-              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                <Droplet className="w-8 h-8" fill="white" />
-              </div>
-              <h1 className="text-3xl font-bold">Mycarwash</h1>
-            </div>
-            <p className="text-center text-green-50 text-sm">Premium Car Wash Service</p>
-          </div>
+        <div className="bg-white rounded-2xl overflow-hidden shadow-lg">
 
-          {/* Toggle Login/Register */}
-          <div className="flex">
-            <button
-              onClick={() => { setIsLogin(true); resetForm(); }}
-              className={`flex-1 py-4 font-semibold transition-all duration-200 relative ${
-                isLogin ? 'text-green-600' : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Login
-              {isLogin && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-600"></div>
-              )}
-            </button>
-            <button
-              onClick={() => { setIsLogin(false); resetForm(); }}
-              className={`flex-1 py-4 font-semibold transition-all duration-200 relative ${
-                !isLogin ? 'text-green-600' : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Register
-              {!isLogin && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-600"></div>
-              )}
-            </button>
+          {/* Heading */}
+          <div className="p-8 text-center">
+            <h1 className="text-3xl font-bold text-gray-800">Login</h1>
           </div>
 
           {/* Form Content */}
           <div className="p-8">
             {step === 1 ? (
               <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                    {isLogin ? 'Welcome Back!' : 'Create Account'}
-                  </h2>
-                  <p className="text-gray-600 text-sm">
-                    {isLogin 
-                      ? 'Enter your email to receive a login code' 
-                      : 'Join us for the best car wash experience'}
-                  </p>
-                </div>
-
-                {!isLogin && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg transition-all duration-200 outline-none focus:ring-2 focus:ring-green-500"
-                      placeholder="John Doe"
-                    />
-                  </div>
-                )}
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address
@@ -154,23 +83,22 @@ export default function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg transition-all duration-200 outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-200 outline-none focus:ring-2 focus:ring-[#D4AF37]"
                     placeholder="you@example.com"
+                    style={{ backgroundColor: '#FFF4D6', color: '#333' }}
                   />
                 </div>
 
                 <button
                   onClick={handleSendOtp}
-                  disabled={loading || !email || (!isLogin && !name)}
-                  className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={loading || !email}
+                  className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-3 rounded-lg font-semibold hover:from-[#b69530] hover:to-[#D4AF37] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Sending...' : 'Send OTP'}
                 </button>
 
+                {/* Google Login */}
                 <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full"></div>
-                  </div>
                   <div className="relative flex justify-center text-sm">
                     <span className="px-4 bg-white text-gray-500">Or continue with</span>
                   </div>
@@ -194,7 +122,7 @@ export default function LoginPage() {
               <div className="space-y-6">
                 <button
                   onClick={resetForm}
-                  className="flex items-center space-x-2 text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
+                  className="flex items-center space-x-2 text-[#D4AF37] hover:text-[#b69530] font-medium transition-colors duration-200"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -223,7 +151,8 @@ export default function LoginPage() {
                         value={digit}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                        className="w-12 h-14 text-center text-xl font-bold rounded-lg transition-all duration-200 outline-none focus:ring-2 focus:ring-green-500"
+                        className="w-12 h-14 text-center text-xl font-bold rounded-lg transition-all duration-200 outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                        style={{ backgroundColor: '#FFF4D6', color: '#333' }}
                       />
                     ))}
                   </div>
@@ -232,7 +161,7 @@ export default function LoginPage() {
                 <button
                   onClick={handleVerifyOtp}
                   disabled={loading || otp.some(d => !d)}
-                  className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-3 rounded-lg font-semibold hover:from-[#b69530] hover:to-[#D4AF37] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   {loading ? (
                     <span>Verifying...</span>
@@ -243,50 +172,11 @@ export default function LoginPage() {
                     </>
                   )}
                 </button>
-
-                <div className="text-center">
-                  <button
-                    onClick={() => { resetForm(); setTimeout(handleSendOtp, 100); }}
-                    className="text-sm text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
-                  >
-                    Didn't receive the code? Resend
-                  </button>
-                </div>
               </div>
             )}
           </div>
         </div>
-
-        {/* Footer Text */}
-        <p className="text-center text-gray-600 text-sm mt-6">
-          By continuing, you agree to our{' '}
-          <a href="#" className="text-green-600 hover:text-green-700 font-medium">
-            Terms of Service
-          </a>{' '}
-          and{' '}
-          <a href="#" className="text-green-600 hover:text-green-700 font-medium">
-            Privacy Policy
-          </a>
-        </p>
       </div>
-
-      <style>{`
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
     </div>
   );
 }

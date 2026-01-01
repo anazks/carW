@@ -1,5 +1,4 @@
-
-import { MapPin, Clock,CheckCircle, XCircle, Clock as ClockIcon, Calendar } from 'lucide-react';
+import { MapPin, Clock, Check, X } from 'lucide-react';
 
 interface Booking {
   id: number;
@@ -55,81 +54,93 @@ const dummyBookings: Booking[] = [
   }
 ];
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'completed':
+      return 'bg-green-100 text-green-700';
+    case 'cancelled':
+      return 'bg-red-100 text-red-700';
+    case 'upcoming':
+      return 'bg-yellow-100 text-yellow-700';
+    default:
+      return 'bg-gray-100 text-gray-700';
+  }
+};
+
 const getStatusIcon = (status: string) => {
   switch (status) {
     case 'completed':
-      return <CheckCircle className="w-5 h-5 text-green-600" />;
+      return <Check className="w-4 h-4" />;
     case 'cancelled':
-      return <XCircle className="w-5 h-5 text-red-600" />;
+      return <X className="w-4 h-4" />;
     case 'upcoming':
-      return <ClockIcon className="w-5 h-5 text-green-600" />;
+      return <Clock className="w-4 h-4" />;
     default:
       return null;
   }
 };
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'completed':
-      return 'bg-green-100 text-green-800';
-    case 'cancelled':
-      return 'bg-red-100 text-red-800';
-    case 'upcoming':
-      return 'bg-green-100 text-green-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
 export default function History() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8 pt-20">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#FFF8DC] to-[#FFF1B5] py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Page Title */}
+        <h1
+          className="text-3xl font-bold mb-8 text-gray-900"
+          style={{ fontFamily: "'Bodoni Moda', serif" }}
+        >
+          Booking History
+        </h1>
 
-        {/* Bookings List */}
+        {/* Booking Cards */}
         <div className="space-y-6">
           {dummyBookings.map((booking) => (
-            <div key={booking.id} className="bg-white rounded-2xl overflow-hidden">
-              <div className="p-6 space-y-4">
-                {/* Header: Shop Name and Location */}
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900">{booking.shopName}</h3>
-                    <div className="flex items-center space-x-2 text-gray-600 mt-1">
-                      <MapPin className="w-4 h-4" />
+            <div key={booking.id} className="bg-white rounded-3xl shadow-lg overflow-hidden">
+              <div className="p-6 sm:p-8 space-y-4">
+                {/* Header: Shop & Status */}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2
+                      className="text-xl font-bold text-gray-900"
+                      style={{ fontFamily: "'Bodoni Moda', serif" }}
+                    >
+                      {booking.shopName}
+                    </h2>
+                    <div className="flex items-center gap-2 text-gray-600 mt-1">
+                      <MapPin className="w-4 h-4 text-[#D4AF37]" />
                       <span className="text-sm">{booking.location}</span>
                     </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
+                  <div
+                    className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}
+                  >
                     {getStatusIcon(booking.status)}
-                    <span className="ml-1 capitalize">{booking.status}</span>
+                    <span className="capitalize">{booking.status}</span>
                   </div>
                 </div>
 
-                {/* Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-green-600" />
+                {/* Booking Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#D4AF37]" />
                     <span>{booking.date}</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4 text-green-600" />
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#D4AF37]" />
                     <span>{booking.time}</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium text-gray-900">Service:</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">Service:</span>
                     <span>{booking.service}</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-semibold text-green-600">{booking.price}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-gray-900">{booking.price}</span>
                   </div>
                 </div>
 
                 {/* Action Button */}
                 <div className="pt-4 border-t border-gray-100">
-                  <button className="text-green-600 hover:text-green-800 font-medium text-sm">
+                  <button className="px-4 py-2 bg-[#D4AF37] text-white font-semibold rounded-xl hover:bg-[#b69530] transition-all text-sm">
                     {booking.status === 'upcoming' ? 'Reschedule' : 'View Receipt'}
                   </button>
                 </div>
@@ -138,13 +149,20 @@ export default function History() {
           ))}
         </div>
 
-        {/* Empty State if no bookings */}
+        {/* Empty State */}
         {dummyBookings.length === 0 && (
           <div className="text-center py-12">
-            <ClockIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No bookings yet</h3>
-            <p className="text-gray-600 mb-6">Your booking history will appear here once you make a reservation.</p>
-            <button className="px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700">
+            <Clock className="w-16 h-16 text-[#D4AF37] mx-auto mb-4" />
+            <h3
+              className="text-xl font-semibold text-gray-900 mb-2"
+              style={{ fontFamily: "'Bodoni Moda', serif" }}
+            >
+              No bookings yet
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Your booking history will appear here once you make a reservation.
+            </p>
+            <button className="px-6 py-3 bg-[#D4AF37] text-white font-semibold rounded-xl hover:bg-[#b69530]">
               Book Now
             </button>
           </div>
