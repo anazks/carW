@@ -1,11 +1,9 @@
-import { Clock, Star, Navigation } from 'lucide-react';
+import { useRef } from 'react';
+import { Clock, Star, Navigation, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import car1 from '../../assets/images/car1.jpg';
 import car2 from '../../assets/images/car2.jpg';
 import car3 from '../../assets/images/car3.jpg';
-
-// Google Fonts (add in index.html)
-// <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@700&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
 
 export default function Card() {
   const carWashCenters = [
@@ -39,88 +37,129 @@ export default function Card() {
       price: "₹120 - ₹400",
       image: car3,
     },
+    {
+      id: 4,
+      name: "Mycarwash NorthWest",
+      rating: 4.8,
+      reviews: 245,
+      hours: "8:00 AM - 6:00 PM",
+      distance: "5.3 km",
+      price: "₹350 - ₹800",
+      image: car1,
+    },
   ];
 
-  const renderSection = (title: string) => (
-    <div className="mb-14">
-      <h2
-        style={{ fontFamily: "'Bodoni Moda', serif" }}
-        className="text-2xl font-bold text-gray-900 mb-5"
-      >
-        {title}
-      </h2>
+  const renderSection = (title: string) => {
+    const scrollRef = useRef<HTMLDivElement>(null);
 
-      <div className="flex gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden">
-        {carWashCenters.map((center) => (
-          <div
-            key={center.id}
-            className="min-w-[280px] bg-white rounded-xl shadow-md overflow-hidden flex flex-col"
-          >
-            {/* IMAGE */}
-            <div className="relative h-40">
-              <img
-                src={center.image}
-                alt={center.name}
-                className="w-full h-full object-cover"
-              />
+    const scroll = (direction: 'left' | 'right') => {
+      scrollRef.current?.scrollBy({
+        left: direction === 'left' ? -300 : 300,
+        behavior: 'smooth',
+      });
+    };
 
-              {/* Distance */}
-              <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full flex items-center gap-1 text-xs">
-                <Navigation className="w-3 h-3" />
-                {center.distance}
-              </div>
+    return (
+      <div className="mb-14 relative">
+        {/* TITLE */}
+        <h2
+          style={{ fontFamily: "'Bodoni Moda', serif" }}
+          className="text-2xl font-bold text-gray-900 mb-5"
+        >
+          {title}
+        </h2>
 
-              {/* Rating */}
-              <div className="absolute bottom-2 left-2 bg-white px-2 py-1 rounded-full flex items-center gap-1 text-xs">
-                <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                <span className="font-semibold">{center.rating}</span>
-                <span className="text-gray-500">({center.reviews})</span>
-              </div>
-            </div>
+        {/* LEFT ARROW */}
+<button
+  onClick={() => scroll('left')}
+  className="absolute left-0 top-1/2 -translate-y-1/2 z-20
+             bg-white shadow-md rounded-full p-2
+             hover:bg-[#FFF8DC]"
+>
+  <ChevronLeft className="w-5 h-5 text-[#D4AF37]" />
+</button>
 
-            {/* CONTENT */}
-            <div className="p-4 flex flex-col flex-grow">
-              <h3
-                style={{ fontFamily: "'Bodoni Moda', serif" }}
-                className="text-base font-bold text-gray-900 mb-2"
-              >
-                {center.name}
-              </h3>
 
-              <div className="flex items-center gap-2 text-gray-600 mb-4">
-                <Clock className="w-3 h-3" />
-                <span
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
-                  className="text-xs"
-                >
-                  {center.hours}
-                </span>
-              </div>
+        {/* CARD LIST */}
+        <div
+          ref={scrollRef}
+          className="flex gap-6 overflow-x-auto px-10
+                     [&::-webkit-scrollbar]:hidden scroll-smooth"
+        >
+          {carWashCenters.map((center) => (
+            <div
+              key={center.id}
+              className="min-w-[280px] bg-white rounded-xl shadow-md overflow-hidden flex flex-col"
+            >
+              {/* IMAGE */}
+              <div className="relative h-40">
+                <img
+                  src={center.image}
+                  alt={center.name}
+                  className="w-full h-full object-cover"
+                />
 
-              {/* PRICE + BUTTON */}
-              <div className="mt-auto flex items-center justify-between border-t pt-3">
-                <div>
-                  <p
-                    style={{ fontFamily: "'Montserrat', sans-serif" }}
-                    className="text-xs text-gray-500"
-                  >
-                    Price Range
-                  </p>
-                  <p className="text-sm font-semibold text-gray-900">
-                    {center.price}
-                  </p>
+                {/* Distance */}
+                <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full flex items-center gap-1 text-xs">
+                  <Navigation className="w-3 h-3" />
+                  {center.distance}
                 </div>
 
-                <button className="px-3 py-1.5 text-xs font-semibold bg-black text-white rounded-md hover:bg-gray-800">
-                  Book Now
-                </button>
+                {/* Rating */}
+                <div className="absolute bottom-2 left-2 bg-white px-2 py-1 rounded-full flex items-center gap-1 text-xs">
+                  <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                  <span className="font-semibold">{center.rating}</span>
+                  <span className="text-gray-500">({center.reviews})</span>
+                </div>
+              </div>
+
+              {/* CONTENT */}
+              <div className="p-4 flex flex-col flex-grow">
+                <h3
+                  style={{ fontFamily: "'Bodoni Moda', serif" }}
+                  className="text-base font-bold text-gray-900 mb-2"
+                >
+                  {center.name}
+                </h3>
+
+                <div className="flex items-center gap-2 text-gray-600 mb-4">
+                  <Clock className="w-3 h-3" />
+                  <span className="text-xs">
+                    {center.hours}
+                  </span>
+                </div>
+
+                {/* PRICE + BUTTON */}
+                <div className="mt-auto flex items-center justify-between border-t pt-3">
+                  <div>
+                    <p className="text-xs text-gray-500">Price Range</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {center.price}
+                    </p>
+                  </div>
+
+                  <button className="px-3 py-1.5 text-xs font-semibold bg-black text-white rounded-md hover:bg-gray-800">
+                    Book Now
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {/* RIGHT ARROW */}
+<button
+  onClick={() => scroll('right')}
+  className="absolute right-0 top-1/2 -translate-y-1/2 z-20
+             bg-white shadow-md rounded-full p-2
+             hover:bg-[#FFF8DC]"
+>
+  <ChevronRight className="w-5 h-5 text-[#D4AF37]" />
+</button>
+
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="bg-gray-50 py-16">
