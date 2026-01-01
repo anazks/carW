@@ -1,291 +1,133 @@
-import { useState, useEffect, useRef } from 'react';
-import { Clock, Star, Navigation, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, Star, Navigation } from 'lucide-react';
+
+import car1 from '../../assets/images/car1.jpg';
+import car2 from '../../assets/images/car2.jpg';
+import car3 from '../../assets/images/car3.jpg';
+
+// Google Fonts (add in index.html)
+// <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@700&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
 
 export default function Card() {
-  const [isMobile, setIsMobile] = useState(false);
-  const nearRef = useRef<HTMLDivElement>(null);
-  const popRef = useRef<HTMLDivElement>(null);
-  const sugRef = useRef<HTMLDivElement>(null);
-
   const carWashCenters = [
     {
       id: 1,
       name: "Mycarwash Downtown",
-      location: "123 Main Street, Downtown",
       rating: 4.8,
       reviews: 245,
       hours: "8:00 AM - 8:00 PM",
-      phone: "+91 234-567-8901",
       distance: "2.3 km",
-      services: ["Express Wash", "Full Detail", "Interior Clean"],
       price: "₹150 - ₹500",
-      image: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)"
+      image: car1,
     },
     {
       id: 2,
       name: "Mycarwash Uptown",
-      location: "456 Oak Avenue, Uptown",
       rating: 4.9,
       reviews: 312,
       hours: "7:00 AM - 9:00 PM",
-      phone: "+91 234-567-8902",
       distance: "3.7 km",
-      services: ["Premium Wash", "Wax & Polish", "Engine Clean"],
       price: "₹200 - ₹750",
-      image: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
+      image: car2,
     },
     {
       id: 3,
       name: "Mycarwash Westside",
-      location: "789 Pine Road, Westside",
       rating: 4.7,
       reviews: 189,
       hours: "8:00 AM - 7:00 PM",
-      phone: "+91 234-567-8903",
       distance: "5.1 km",
-      services: ["Basic Wash", "Vacuum", "Tire Shine"],
       price: "₹120 - ₹400",
-      image: "linear-gradient(135deg, #4ade80 0%, #22c55e 100%)"
+      image: car3,
     },
-    {
-      id: 4,
-      name: "Mycarwash Eastside",
-      location: "101 Elm Boulevard, Eastside",
-      rating: 4.6,
-      reviews: 156,
-      hours: "9:00 AM - 6:00 PM",
-      phone: "+91 234-567-8904",
-      distance: "1.8 km",
-      services: ["Quick Rinse", "Exterior Polish", "Wheel Clean"],
-      price: "₹100 - ₹350",
-      image: "linear-gradient(135deg, #86efac 0%, #4ade80 100%)"
-    },
-    {
-      id: 5,
-      name: "Mycarwash North End",
-      location: "202 Cedar Lane, North End",
-      rating: 4.9,
-      reviews: 401,
-      hours: "6:30 AM - 10:00 PM",
-      phone: "+91 234-567-8905",
-      distance: "4.2 km",
-      services: ["Deluxe Package", "UV Protection", "Leather Care"],
-      price: "₹250 - ₹800",
-      image: "linear-gradient(135deg, #dcfce7 0%, #86efac 100%)"
-    }
   ];
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const renderSection = (title: string) => (
+    <div className="mb-14">
+      <h2
+        style={{ fontFamily: "'Bodoni Moda', serif" }}
+        className="text-2xl font-bold text-gray-900 mb-5"
+      >
+        {title}
+      </h2>
 
-  useEffect(() => {
-    if (!isMobile) return;
+      <div className="flex gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+        {carWashCenters.map((center) => (
+          <div
+            key={center.id}
+            className="min-w-[280px] bg-white rounded-xl shadow-md overflow-hidden flex flex-col"
+          >
+            {/* IMAGE */}
+            <div className="relative h-40">
+              <img
+                src={center.image}
+                alt={center.name}
+                className="w-full h-full object-cover"
+              />
 
-    const refs = [nearRef, popRef, sugRef];
-    const intervals: number[] = [];
+              {/* Distance */}
+              <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full flex items-center gap-1 text-xs">
+                <Navigation className="w-3 h-3" />
+                {center.distance}
+              </div>
 
-    refs.forEach((ref) => {
-      if (!ref.current) return;
-      const interval = setInterval(() => {
-        if (ref.current) {
-          const scrollAmount = ref.current.offsetWidth + 24;
-          ref.current.scrollLeft += scrollAmount;
-          if (ref.current.scrollLeft >= ref.current.scrollWidth - ref.current.offsetWidth) {
-            ref.current.scrollLeft = 0;
-          }
-        }
-      }, 4000);
-      intervals.push(interval);
-    });
+              {/* Rating */}
+              <div className="absolute bottom-2 left-2 bg-white px-2 py-1 rounded-full flex items-center gap-1 text-xs">
+                <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                <span className="font-semibold">{center.rating}</span>
+                <span className="text-gray-500">({center.reviews})</span>
+              </div>
+            </div>
 
-    return () => intervals.forEach(clearInterval);
-  }, [isMobile]);
+            {/* CONTENT */}
+            <div className="p-4 flex flex-col flex-grow">
+              <h3
+                style={{ fontFamily: "'Bodoni Moda', serif" }}
+                className="text-base font-bold text-gray-900 mb-2"
+              >
+                {center.name}
+              </h3>
 
-  const nearYou = carWashCenters
-    .sort((a, b) => parseFloat(a.distance.split(' ')[0]) - parseFloat(b.distance.split(' ')[0]))
-    .slice(0, 2);
+              <div className="flex items-center gap-2 text-gray-600 mb-4">
+                <Clock className="w-3 h-3" />
+                <span
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  className="text-xs"
+                >
+                  {center.hours}
+                </span>
+              </div>
 
-  const nearIds = new Set(nearYou.map((c) => c.id));
+              {/* PRICE + BUTTON */}
+              <div className="mt-auto flex items-center justify-between border-t pt-3">
+                <div>
+                  <p
+                    style={{ fontFamily: "'Montserrat', sans-serif" }}
+                    className="text-xs text-gray-500"
+                  >
+                    Price Range
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {center.price}
+                  </p>
+                </div>
 
-  const mostPopular = carWashCenters
-    .filter((c) => !nearIds.has(c.id))
-    .sort((a, b) => b.reviews - a.reviews)
-    .slice(0, 2);
-
-  const popIds = new Set(mostPopular.map((c) => c.id));
-
-  const suggested = carWashCenters.filter(
-    (c) => !nearIds.has(c.id) && !popIds.has(c.id)
+                <button className="px-3 py-1.5 text-xs font-semibold bg-black text-white rounded-md hover:bg-gray-800">
+                  Book Now
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 
-  const renderSection = (title: string, centers: typeof carWashCenters, sectionRef: React.RefObject<HTMLDivElement | null>) => {
-    const scrollLeft = () => {
-      if (sectionRef?.current) {
-        const scrollAmount = sectionRef.current.offsetWidth + 24;
-        sectionRef.current.scrollLeft -= scrollAmount;
-      }
-    };
-
-    const scrollRight = () => {
-      if (sectionRef?.current) {
-        const scrollAmount = sectionRef.current.offsetWidth + 24;
-        sectionRef.current.scrollLeft += scrollAmount;
-        if (sectionRef.current.scrollLeft >= sectionRef.current.scrollWidth - sectionRef.current.offsetWidth) {
-          sectionRef.current.scrollLeft = 0;
-        }
-      }
-    };
-
-    return (
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-4 text-center md:text-left">{title}</h2>
-        <div className="relative hidden md:block">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {centers.map((center) => (
-              <div key={center.id} className="w-full md:w-auto">
-                <div className="bg-white shadow-lg overflow-hidden">
-                  {/* Image/Gradient Header */}
-                  <div 
-                    className="h-40 relative"
-                    style={{ background: center.image }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                    
-                    {/* Distance Badge */}
-                    <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full flex items-center space-x-1">
-                      <Navigation className="w-3 h-3 text-green-600" />
-                      <span className="text-xs font-semibold text-gray-900">{center.distance}</span>
-                    </div>
-
-                    {/* Rating Badge */}
-                    <div className="absolute bottom-2 left-2 bg-white/90 px-2 py-1 rounded-full flex items-center space-x-1">
-                      <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                      <span className="text-xs font-bold text-gray-900">{center.rating}</span>
-                      <span className="text-xs text-gray-600">({center.reviews})</span>
-                    </div>
-                  </div>
-
-                  {/* Card Content */}
-                  <div className="p-3 space-y-2">
-                    
-                    {/* Title */}
-                    <h3 className="text-base font-bold text-gray-900">
-                      {center.name}
-                    </h3>
-
-                    {/* Opening Time */}
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Clock className="w-3 h-3 text-green-600 flex-shrink-0" />
-                      <span className="text-xs font-medium">{center.hours}</span>
-                    </div>
-
-                    {/* Price & CTA */}
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                      <div>
-                        <p className="text-xs text-gray-500 mb-0.5">Starting from</p>
-                        <p className="text-base font-bold text-green-600">{center.price}</p>
-                      </div>
-                      <button className="px-3 py-1.5 bg-green-600 text-white font-semibold text-xs rounded hover:bg-green-700">
-                        Book Now
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="relative md:hidden">
-          <div ref={sectionRef} className="flex flex-nowrap overflow-x-auto gap-6 pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {centers.map((center) => (
-              <div key={center.id} className="flex-shrink-0 w-full snap-start">
-                <div className="bg-white shadow-lg overflow-hidden">
-                  {/* Image/Gradient Header */}
-                  <div 
-                    className="h-40 relative"
-                    style={{ background: center.image }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                    
-                    {/* Distance Badge */}
-                    <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full flex items-center space-x-1">
-                      <Navigation className="w-3 h-3 text-green-600" />
-                      <span className="text-xs font-semibold text-gray-900">{center.distance}</span>
-                    </div>
-
-                    {/* Rating Badge */}
-                    <div className="absolute bottom-2 left-2 bg-white/90 px-2 py-1 rounded-full flex items-center space-x-1">
-                      <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                      <span className="text-xs font-bold text-gray-900">{center.rating}</span>
-                      <span className="text-xs text-gray-600">({center.reviews})</span>
-                    </div>
-                  </div>
-
-                  {/* Card Content */}
-                  <div className="p-3 space-y-2">
-                    
-                    {/* Title */}
-                    <h3 className="text-base font-bold text-gray-900">
-                      {center.name}
-                    </h3>
-
-                    {/* Opening Time */}
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Clock className="w-3 h-3 text-green-600 flex-shrink-0" />
-                      <span className="text-xs font-medium">{center.hours}</span>
-                    </div>
-
-                    {/* Price & CTA */}
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                      <div>
-                        <p className="text-xs text-gray-500 mb-0.5">Starting from</p>
-                        <p className="text-base font-bold text-green-600">{center.price}</p>
-                      </div>
-                      <button className="px-3 py-1.5 bg-green-600 text-white font-semibold text-xs rounded hover:bg-green-700">
-                        Book Now
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Left Arrow */}
-          <button
-            onClick={scrollLeft}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white/80 rounded-full p-3 shadow-lg flex items-center justify-center w-12 h-12 hover:bg-white transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          {/* Right Arrow */}
-          <button
-            onClick={scrollRight}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white/80 rounded-full p-3 shadow-lg flex items-center justify-center w-12 h-12 hover:bg-white transition-colors"
-          >
-            <ChevronRight className="w-5 h-5 text-gray-600" />
-          </button>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="bg-gradient-to-b from-white via-green-50 to-emerald-100 min-h-screen py-16">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {renderSection('Near You', nearYou, nearRef)}
-        {renderSection('Most Popular', mostPopular, popRef)}
-        {renderSection('Suggested', suggested, sugRef)}
-
-        {/* View All Button */}
-        <div className="text-center mt-12">
-          <button className="px-8 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700">
-            View All Locations
-          </button>
-        </div>
+    <div className="bg-gray-50 py-16">
+      <div className="max-w-6xl mx-auto px-4">
+        {renderSection("Near You")}
+        {renderSection("Most Popular")}
+        {renderSection("Suggested")}
       </div>
     </div>
   );

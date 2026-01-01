@@ -1,5 +1,6 @@
-
-import { User, Mail, Phone, Calendar, DollarSign, Settings, LogOut, Edit } from 'lucide-react';
+import { User, Mail, Phone, Calendar, Settings, LogOut, Edit } from 'lucide-react';
+import booking1Img from '../../assets/images/car1.jpg';
+import booking2Img from '../../assets/images/car2.jpg';
 
 const dummyUser = {
   name: "John Doe",
@@ -11,9 +12,24 @@ const dummyUser = {
   memberSince: "2024-03-15"
 };
 
+// Local images for recent bookings
 const dummyRecentBookings = [
-  { id: 1, shop: "Mycarwash Downtown", date: "2025-11-05", service: "Express Wash", price: "₹150" },
-  { id: 2, shop: "Mycarwash Uptown", date: "2025-11-03", service: "Full Detail", price: "₹450" }
+  { 
+    id: 1, 
+    shop: "Mycarwash Downtown", 
+    date: "2025-11-05", 
+    service: "Express Wash", 
+    price: "₹150",
+    image: booking1Img
+  },
+  { 
+    id: 2, 
+    shop: "Mycarwash Uptown", 
+    date: "2025-11-03", 
+    service: "Full Detail", 
+    price: "₹450",
+    image: booking2Img
+  }
 ];
 
 export default function Profile() {
@@ -22,10 +38,12 @@ export default function Profile() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-700 bg-clip-text text-transparent mb-2">
+          <h1
+            className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#D4AF37] to-[#b69530] bg-clip-text text-transparent mb-2"
+            style={{ fontFamily: "'Bodoni Moda', serif" }}
+          >
             Profile
           </h1>
-        
         </div>
 
         {/* User Info Card */}
@@ -42,22 +60,29 @@ export default function Profile() {
               </div>
               {/* User Details */}
               <div className="flex-1 text-center lg:text-left">
-                <h2 className="text-2xl font-bold text-gray-900">{dummyUser.name}</h2>
+                <h2
+                  className="text-2xl font-bold text-gray-900"
+                  style={{ fontFamily: "'Bodoni Moda', serif" }}
+                >
+                  {dummyUser.name}
+                </h2>
                 <div className="flex flex-col sm:flex-row justify-center lg:justify-start space-y-2 sm:space-y-0 sm:space-x-6 mt-2">
                   <div className="flex items-center space-x-2 text-gray-600">
-                    <Mail className="w-4 h-4" />
+                    <Mail className="w-4 h-4 text-[#D4AF37]" />
                     <span className="text-sm">{dummyUser.email}</span>
                   </div>
                   <div className="flex items-center space-x-2 text-gray-600">
-                    <Phone className="w-4 h-4" />
+                    <Phone className="w-4 h-4 text-[#D4AF37]" />
                     <span className="text-sm">{dummyUser.phone}</span>
                   </div>
                 </div>
               </div>
               {/* Edit Button */}
-              <button className="flex items-center space-x-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-[#D4AF37] text-white rounded-lg hover:bg-[#b69530] transition-colors">
                 <Edit className="w-4 h-4" />
-                <span className="text-sm font-medium">Edit Profile</span>
+                <span className="text-sm font-medium" style={{ fontFamily: "'Bodoni Moda', serif" }}>
+                  Edit Profile
+                </span>
               </button>
             </div>
           </div>
@@ -66,20 +91,25 @@ export default function Profile() {
         {/* Stats Card */}
         <div className="bg-white rounded-2xl overflow-hidden mb-8">
           <div className="p-6 lg:p-8">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">Your Stats</h3>
+            <h3
+              className="text-lg font-semibold mb-4 text-gray-900"
+              style={{ fontFamily: "'Bodoni Moda', serif" }}
+            >
+              Your Stats
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <Calendar className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                <Calendar className="w-8 h-8 text-[#D4AF37] mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Total Bookings</p>
                 <p className="text-2xl font-bold text-gray-900">{dummyUser.totalBookings}</p>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                <span className="w-8 h-8 text-[#D4AF37] mx-auto mb-2 flex items-center justify-center text-2xl font-bold">₹</span>
                 <p className="text-sm text-gray-600">Total Spent</p>
                 <p className="text-2xl font-bold text-gray-900">{dummyUser.totalSpent}</p>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <User className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                <User className="w-8 h-8 text-[#D4AF37] mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Member Since</p>
                 <p className="text-2xl font-bold text-gray-900">{new Date(dummyUser.memberSince).toLocaleDateString()}</p>
               </div>
@@ -91,19 +121,33 @@ export default function Profile() {
         <div className="bg-white rounded-2xl overflow-hidden mb-8">
           <div className="p-6 lg:p-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Recent Bookings</h3>
-              <button className="text-green-600 hover:text-green-800 font-medium text-sm">
+              <h3
+                className="text-lg font-semibold text-gray-900"
+                style={{ fontFamily: "'Bodoni Moda', serif" }}
+              >
+                Recent Bookings
+              </h3>
+              <button className="text-[#D4AF37] hover:text-[#b69530] font-medium text-sm">
                 View All History
               </button>
             </div>
             <div className="space-y-4">
               {dummyRecentBookings.map((booking) => (
                 <div key={booking.id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Calendar className="w-6 h-6 text-green-600" />
+                  <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden">
+                    <img
+                      src={booking.image}
+                      alt={booking.shop}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">{booking.shop}</h4>
+                    <h4
+                      className="font-medium text-gray-900"
+                      style={{ fontFamily: "'Bodoni Moda', serif" }}
+                    >
+                      {booking.shop}
+                    </h4>
                     <p className="text-sm text-gray-600">{booking.date} • {booking.service}</p>
                   </div>
                   <div className="text-right">
@@ -118,20 +162,25 @@ export default function Profile() {
         {/* Settings & Logout */}
         <div className="bg-white rounded-2xl overflow-hidden">
           <div className="p-6 lg:p-8 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Account Settings</h3>
+            <h3
+              className="text-lg font-semibold text-gray-900"
+              style={{ fontFamily: "'Bodoni Moda', serif" }}
+            >
+              Account Settings
+            </h3>
             <div className="space-y-2">
               <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                <Settings className="w-5 h-5" />
-                <span>Privacy & Security</span>
+                <Settings className="w-5 h-5 text-[#D4AF37]" />
+                <span style={{ fontFamily: "'Bodoni Moda', serif" }}>Privacy & Security</span>
               </button>
               <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                <DollarSign className="w-5 h-5" />
-                <span>Payment Methods</span>
+                <span className="w-5 h-5 text-[#D4AF37] flex items-center justify-center text-sm font-bold">₹</span>
+                <span style={{ fontFamily: "'Bodoni Moda', serif" }}>Payment Methods</span>
               </button>
             </div>
             <button className="w-full flex items-center justify-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors">
               <LogOut className="w-5 h-5" />
-              <span className="font-medium">Log Out</span>
+              <span className="font-medium" style={{ fontFamily: "'Bodoni Moda', serif" }}>Log Out</span>
             </button>
           </div>
         </div>
