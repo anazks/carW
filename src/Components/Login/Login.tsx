@@ -1,41 +1,39 @@
-import { useState } from 'react';
-import { ArrowLeft, Check } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { ArrowLeft, Check } from "lucide-react";
 
 export default function LoginPage() {
-<<<<<<< HEAD
-  const [step, setStep] = useState(1);
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [loading, setLoading] = useState(false);
-
-=======
-  // state
-  const [step, setStep] = useState<number>(1); // 1: email, 2: otp
-  const [email, setEmail] = useState<string>('');
-  const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
+  const [step, setStep] = useState<number>(1);
+  const [email, setEmail] = useState<string>("");
+  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // handle otp box input change
->>>>>>> origin/rasha
+  // 🔒 Disable scroll on login page
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "auto";
+      document.documentElement.style.overflow = "auto";
+    };
+  }, []);
+
   const handleOtpChange = (index: number, value: string) => {
-    if (value.length <= 1 && /^\d*$/.test(value)) {
+    if (/^\d?$/.test(value)) {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
-
       if (value && index < 5) {
         document.getElementById(`otp-${index + 1}`)?.focus();
       }
     }
   };
 
-<<<<<<< HEAD
-  const handleOtpKeyDown = (index: number, e: any) => {
-=======
-  // handle backspace navigation
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
->>>>>>> origin/rasha
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+  const handleOtpKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
       document.getElementById(`otp-${index - 1}`)?.focus();
     }
   };
@@ -46,7 +44,7 @@ export default function LoginPage() {
     setTimeout(() => {
       setLoading(false);
       setStep(2);
-    }, 1500);
+    }, 1200);
   };
 
   const handleVerifyOtp = () => {
@@ -54,253 +52,114 @@ export default function LoginPage() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      alert('Login successful!');
-    }, 1500);
-  };
-
-  const handleGoogleLogin = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      alert('Google login successful!');
-    }, 1500);
+      alert("Login successful");
+    }, 1200);
   };
 
   const resetForm = () => {
     setStep(1);
-    setEmail('');
-    setOtp(['', '', '', '', '', '']);
+    setEmail("");
+    setOtp(["", "", "", "", "", ""]);
   };
 
   return (
-<<<<<<< HEAD
-    <>
-      {/* PAGE WRAPPER — prevents scroll */}
-      <div
-        className="flex items-center justify-center bg-gradient-to-br from-white via-[#FEF9F2] to-white overflow-hidden"
-        style={{
-          height: 'calc(100vh - 112px)', // 64px navbar + 48px footer
-          fontFamily: "'Bodoni Moda', serif",
-        }}
-      >
-        {/* LOGIN CARD */}
-        <div className="w-full max-w-sm">
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div className="min-h-screen w-full bg-white font-[Bodoni_Moda] relative">
 
-            {/* Heading */}
-            <div className="p-5 text-center">
-              <h1 className="text-3xl font-bold text-gray-800">Login</h1>
+      {/* PAGE CONTENT — PUSHED BELOW FIXED NAVBAR */}
+      <div className="flex justify-center pt-20 pb-24">
+        <div className="w-full max-w-xs bg-white rounded-2xl shadow-lg px-4 py-4">
+          <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">
+            Login
+          </h2>
+
+          {step === 1 ? (
+            <div className="space-y-4">
+              {/* EMAIL */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                  style={{ backgroundColor: "#FFF4D6" }}
+                />
+              </div>
+
+              {/* SEND OTP */}
+              <button
+                onClick={handleSendOtp}
+                disabled={loading || !email}
+                className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-2 rounded-lg font-semibold disabled:opacity-50"
+              >
+                {loading ? "Sending..." : "Send OTP"}
+              </button>
+
+              <div className="text-center text-sm text-gray-500">or</div>
+
+              {/* GOOGLE */}
+              <button
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 border py-2 rounded-lg font-semibold hover:bg-gray-50"
+              >
+                Continue with Google
+              </button>
             </div>
+          ) : (
+            <div className="space-y-4">
+              {/* BACK */}
+              <button
+                onClick={resetForm}
+                className="flex items-center gap-2 text-[#D4AF37] font-medium"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </button>
 
-            {/* Content */}
-            <div className="p-6">
-              {step === 1 ? (
-                <div className="space-y-6">
+              {/* OTP INFO */}
+              <p className="text-sm text-gray-600">
+                Enter the 6-digit code sent to{" "}
+                <span className="font-semibold">{email}</span>
+              </p>
 
-                  {/* Email */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      className="w-full px-4 py-2.5 rounded-lg outline-none focus:ring-2 focus:ring-[#D4AF37]"
-                      style={{ backgroundColor: '#FFF4D6', color: '#333' }}
-                    />
-=======
-    <div
-      className="min-h-screen bg-gradient-to-br from-white via-[#FEF9F2] to-white flex items-center justify-center p-4 relative"
-      style={{ fontFamily: "'Bodoni Moda', serif" }}
-    >
-      <div className="relative w-full max-w-md">
-        <div className="bg-white rounded-2xl overflow-hidden shadow-lg">
-
-          <div className="p-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-800">Login</h1>
-          </div>
-
-          <div className="p-8">
-            {step === 1 ? (
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
-                  </label>
+              {/* OTP INPUTS */}
+              <div className="flex justify-between gap-2">
+                {otp.map((digit, index) => (
                   <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg transition-all duration-200 outline-none focus:ring-2 focus:ring-[#D4AF37]"
-                    placeholder="you@example.com"
-                    style={{ backgroundColor: '#FFF4D6', color: '#333' }}
+                    key={index}
+                    id={`otp-${index}`}
+                    type="text"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    className="w-9 h-10 text-center text-lg font-bold rounded-lg outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                    style={{ backgroundColor: "#FFF4D6" }}
                   />
-                </div>
-
-                <button
-                  onClick={handleSendOtp}
-                  disabled={loading || !email}
-                  className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-3 rounded-lg font-semibold hover:from-[#b69530] hover:to-[#D4AF37] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Sending...' : 'Send OTP'}
-                </button>
-
-                <div className="relative my-6">
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white text-gray-500">Or continue with</span>
->>>>>>> origin/rasha
-                  </div>
-
-                  {/* Send OTP */}
-                  <button
-                    onClick={handleSendOtp}
-                    disabled={loading || !email}
-                    className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-2.5 rounded-lg font-semibold hover:from-[#b69530] hover:to-[#D4AF37] transition-all disabled:opacity-50"
-                  >
-                    {loading ? 'Sending...' : 'Send OTP'}
-                  </button>
-
-                  {/* Divider */}
-                  <div className="relative text-center">
-                    <span className="px-4 bg-white text-sm text-gray-500">
-                      Or continue with
-                    </span>
-                  </div>
-
-                  {/* Google Login */}
-                  <button
-                    onClick={handleGoogleLogin}
-                    disabled={loading}
-                    className="w-full flex items-center justify-center gap-3 border py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    <span>Continue with Google</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-6">
-
-<<<<<<< HEAD
-                  {/* Back */}
-                  <button
-                    onClick={resetForm}
-                    className="flex items-center gap-2 text-[#D4AF37] font-medium"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back
-                  </button>
-
-                  {/* OTP Info */}
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                      Verify OTP
-                    </h2>
-                    <p className="text-sm text-gray-600">
-                      Code sent to <span className="font-semibold">{email}</span>
-                    </p>
-                  </div>
-
-                  {/* OTP Inputs */}
-                  <div className="flex justify-between gap-2">
-=======
-                <button
-                  onClick={handleGoogleLogin}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center space-x-3 bg-white py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                  </svg>
-                  <span>Continue with Google</span>
-                </button>
+                ))}
               </div>
-            ) : (
-              <div className="space-y-6">
-                <button
-                  onClick={resetForm}
-                  className="flex items-center space-x-2 text-[#D4AF37] hover:text-[#b69530] font-medium transition-colors duration-200"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Back</span>
-                </button>
 
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Verify OTP</h2>
-                  <p className="text-gray-600 text-sm">
-                    We've sent a 6-digit code to <span className="font-semibold text-gray-800">{email}</span>
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Enter OTP Code
-                  </label>
-
-                  <div className="flex justify-between space-x-2">
->>>>>>> origin/rasha
-                    {otp.map((digit, index) => (
-                      <input
-                        key={index}
-                        id={`otp-${index}`}
-<<<<<<< HEAD
-=======
-                        type="text"
-                        maxLength={1}
->>>>>>> origin/rasha
-                        value={digit}
-                        maxLength={1}
-                        onChange={(e) => handleOtpChange(index, e.target.value)}
-                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                        className="w-11 h-12 text-center text-xl font-bold rounded-lg outline-none focus:ring-2 focus:ring-[#D4AF37]"
-                        style={{ backgroundColor: '#FFF4D6', color: '#333' }}
-                      />
-                    ))}
-                  </div>
-
-<<<<<<< HEAD
-                  {/* Verify */}
-                  <button
-                    onClick={handleVerifyOtp}
-                    disabled={loading || otp.some(d => !d)}
-                    className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-3 rounded-lg font-semibold flex justify-center items-center gap-2 disabled:opacity-50"
-                  >
-                    <Check className="w-5 h-5" />
-                    Verify & Continue
-                  </button>
-                </div>
-              )}
+              {/* VERIFY */}
+              <button
+                onClick={handleVerifyOtp}
+                disabled={loading || otp.some((d) => !d)}
+                className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Check className="w-5 h-5" />
+                Verify & Continue
+              </button>
             </div>
-=======
-                <button
-                  onClick={handleVerifyOtp}
-                  disabled={loading || otp.some((d) => !d)}
-                  className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-3 rounded-lg font-semibold hover:from-[#b69530] hover:to-[#D4AF37] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                >
-                  {loading ? (
-                    <span>Verifying...</span>
-                  ) : (
-                    <>
-                      <Check className="w-5 h-5" />
-                      <span>Verify & Continue</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
->>>>>>> origin/rasha
-          </div>
+          )}
         </div>
       </div>
-    </>
+
+      {/* FOOTER */}
+      <footer className="fixed bottom-0 left-0 w-full text-center text-sm text-gray-600 py-3 bg-gray-100">
+        © {new Date().getFullYear()} MyCarWash. All rights reserved.
+      </footer>
+    </div>
   );
 }

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 
-import carImg from "../../assets/images/car.jpg";
-import bikeImg from "../../assets/images/bike.jpg";
-import heavyImg from "../../assets/images/heavy.jpg";
+import carImg from "../../assets/images/carCard.jpg";
+import bikeImg from "../../assets/images/bikeCard.jpg";
+import heavyImg from "../../assets/images/heavyCard.jpg";
 
 function Banner() {
   const [selectedVehicle, setSelectedVehicle] =

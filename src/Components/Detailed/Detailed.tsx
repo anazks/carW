@@ -1,248 +1,309 @@
-import { useState } from 'react';
-import { MapPin, Clock, Star, Phone, DollarSign, Truck, Home, Check, X } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useState } from "react";
+import { MapPin, Clock } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useParams, useNavigate } from "react-router-dom";
+import "leaflet/dist/leaflet.css";
 
-interface CarWashCenter {
-  id: number;
-  name: string;
-  location: string;
-  rating: number;
-  reviews: number;
-  hours: string;
-  phone: string;
-  distance: string;
-  services: string[];
-  price: string;
-  image: string;
-  capacity: number;
-  totalTime: string;
-  selectedSlot?: string;
-  pickAndDrop: boolean;
-  washAtHome: boolean;
-  pickDropPrice?: string;
-  homeServicePrice?: string;
-  lat?: number;
-  lng?: number;
-}
+/* ================= DATA ================= */
+const carWashCenters = [
+  {
+    id: 1,
+    name: "Mycarwash Downtown",
+    location: "123 Main Street, Downtown",
+    hours: "8:00 AM - 8:00 PM",
+    price: "₹150 - ₹500",
+    totalTime: "30-45 min",
+    vehicleTypes: ["Car", "Bike", "Heavy Vehicle"],
+    pickAndDrop: true,
+    washAtHome: true,
+    lat: 40.7128,
+    lng: -74.006,
+    services: [
+      { name: "Express Wash", price: 150, time: 20 },
+      { name: "Full Detail", price: 500, time: 60 },
+      { name: "Interior Clean", price: 200, time: 30 },
+      { name: "Wax & Polish", price: 250, time: 40 },
+      { name: "Engine Clean", price: 300, time: 30 },
+      { name: "Tire Shine", price: 100, time: 15 },
+      { name: "Underbody Wash", price: 150, time: 20 },
+      { name: "Seat Shampoo", price: 200, time: 25 },
+    ],
+  },
+  {
+    id: 2,
+    name: "Mycarwash Uptown",
+    location: "Uptown Avenue",
+    hours: "7:00 AM - 9:00 PM",
+    price: "₹200 - ₹750",
+    totalTime: "45-60 min",
+    vehicleTypes: ["Car", "Bike", "Heavy Vehicle"],
+    pickAndDrop: true,
+    washAtHome: false,
+    lat: 40.73061,
+    lng: -73.935242,
+    services: [
+      { name: "Express Wash", price: 200, time: 25 },
+      { name: "Interior Clean", price: 250, time: 35 },
+      { name: "Wax", price: 300, time: 40 },
+      { name: "Engine Clean", price: 350, time: 45 },
+      { name: "Seat Shampoo", price: 200, time: 30 },
+      { name: "Tire Shine", price: 100, time: 15 },
+      { name: "Full Detail", price: 600, time: 75 },
+      { name: "Underbody Wash", price: 150, time: 20 },
+    ],
+  },
+  {
+    id: 3,
+    name: "Mycarwash Westside",
+    location: "Westside Road",
+    hours: "8:00 AM - 7:00 PM",
+    price: "₹120 - ₹400",
+    totalTime: "30-40 min",
+    vehicleTypes: ["Car", "Bike", "Heavy Vehicle"],
+    pickAndDrop: false,
+    washAtHome: true,
+    lat: 40.74061,
+    lng: -73.955242,
+    services: [
+      { name: "Express Wash", price: 120, time: 20 },
+      { name: "Interior Clean", price: 150, time: 25 },
+      { name: "Wax & Polish", price: 200, time: 30 },
+      { name: "Seat Shampoo", price: 180, time: 25 },
+      { name: "Tire Shine", price: 100, time: 15 },
+      { name: "Engine Clean", price: 250, time: 30 },
+      { name: "Underbody Wash", price: 150, time: 20 },
+      { name: "Full Detail", price: 400, time: 50 },
+    ],
+  },
+  {
+    id: 4,
+    name: "Mycarwash NorthWest",
+    location: "NorthWest Street",
+    hours: "8:00 AM - 6:00 PM",
+    price: "₹350 - ₹800",
+    totalTime: "50-60 min",
+    vehicleTypes: ["Car", "Bike", "Heavy Vehicle"],
+    pickAndDrop: true,
+    washAtHome: false,
+    lat: 40.75061,
+    lng: -73.975242,
+    services: [
+      { name: "Express Wash", price: 350, time: 30 },
+      { name: "Full Detail", price: 800, time: 75 },
+      { name: "Wax & Polish", price: 400, time: 40 },
+      { name: "Interior Clean", price: 300, time: 35 },
+      { name: "Engine Clean", price: 350, time: 40 },
+      { name: "Seat Shampoo", price: 250, time: 30 },
+      { name: "Underbody Wash", price: 300, time: 35 },
+      { name: "Tire Shine", price: 150, time: 20 },
+    ],
+  },
+];
 
-const dummyCenter: CarWashCenter = {
-  id: 1,
-  name: "Mycarwash Downtown",
-  location: "123 Main Street, Downtown",
-  rating: 4.8,
-  reviews: 245,
-  hours: "8:00 AM - 8:00 PM",
-  phone: "+91 234-567-8901",
-  distance: "2.3 km",
-  services: ["Express Wash", "Full Detail", "Interior Clean", "Wax & Polish"],
-  price: "₹150 - ₹500",
-  image: "linear-gradient(135deg, #D4AF37 0%, #b69530 100%)",
-  capacity: 5,
-  totalTime: "30-45 minutes",
-  selectedSlot: "2:00 PM - 2:30 PM",
-  pickAndDrop: true,
-  washAtHome: true,
-  pickDropPrice: "+ ₹50",
-  homeServicePrice: "+ ₹100",
-  lat: 40.7128,
-  lng: -74.0060
-};
+/* ================= COMPONENT ================= */
+export default function Detailed() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const center = carWashCenters.find((c) => c.id === Number(id));
 
-interface DetailedProps {
-  center?: CarWashCenter;
-}
+  const [vehicle, setVehicle] = useState(center?.vehicleTypes[0] || "");
+  const [services, setServices] = useState<string[]>([]);
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [serviceType, setServiceType] =
+    useState<"center" | "pickDrop" | "home">("center");
 
-export default function Detailed({ center = dummyCenter }: DetailedProps) {
-  const [serviceType, setServiceType] = useState<'center' | 'pickDrop' | 'home'>('center');
-  const selectedSlot = center.selectedSlot || '2:00 PM - 2:30 PM';
+  if (!center) return null;
 
-  const serviceOptions = [
-    { id: 'center', label: 'At Center', icon: MapPin, description: 'Visit our center', available: true, extraCharge: null },
-    { id: 'pickDrop', label: 'Pick & Drop', icon: Truck, description: 'We pick & deliver', available: center.pickAndDrop, extraCharge: center.pickDropPrice },
-    { id: 'home', label: 'Wash at Home', icon: Home, description: 'We come to you', available: center.washAtHome, extraCharge: center.homeServicePrice },
-  ];
+  const toggleService = (name: string) =>
+    setServices((prev) =>
+      prev.includes(name) ? prev.filter((s) => s !== name) : [...prev, name]
+    );
+
+  const totalPrice = services.reduce((sum, s) => {
+    const svc = center.services.find((x) => x.name === s);
+    return sum + (svc?.price || 0);
+  }, 0);
+
+  const totalTime = services.reduce((sum, s) => {
+    const svc = center.services.find((x) => x.name === s);
+    return sum + (svc?.time || 0);
+  }, 0);
+
+  const timeSlots = {
+    morning: ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM"],
+    afternoon: ["12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"],
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24 sm:pt-28 p-3 sm:p-4 lg:p-6">
-      {/* Back Button */}
-      <button className="mb-3 sm:mb-4 flex items-center gap-2 text-[#D4AF37] hover:text-[#b69530] font-medium text-sm sm:text-base">
+    <div className="min-h-screen bg-gray-50 pt-24 px-4 lg:px-8">
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-4 text-[#D4AF37] font-medium"
+      >
         ← Back to locations
       </button>
 
-      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
 
-        {/* Left: Map */}
-        <div className="relative h-[300px] sm:h-[400px] lg:h-[650px] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg z-10">
-          <MapContainer
-            center={[center.lat || 40.7128, center.lng || -74.0060]}
-            zoom={13}
-            scrollWheelZoom={false}
-            className="h-full w-full"
-            style={{ zIndex: 1 }}
-          >
-            <TileLayer
-              attribution='&copy; OpenStreetMap contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Marker position={[center.lat || 40.7128, center.lng || -74.0060]}>
-              <Popup>
-                <strong>{center.name}</strong><br />
-                {center.location}
-              </Popup>
-            </Marker>
-          </MapContainer>
-
-          {/* Floating Info */}
-          <div className="absolute top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 bg-white/95 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:rounded-xl shadow-lg">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-[#D4AF37] text-[#D4AF37]" />
-                <span className="font-semibold text-gray-900 text-sm sm:text-base">{center.rating}</span>
-                <span className="text-xs sm:text-sm text-gray-600">({center.reviews})</span>
-              </div>
-              <div className="flex items-center gap-2 text-[#D4AF37]">
-                <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="font-medium text-sm sm:text-base">{center.distance}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Details */}
-        <div className="space-y-4 sm:space-y-6">
-
-          {/* Header */}
-          <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-200">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Bodoni Moda, serif' }}>{center.name}</h1>
-            <p className="text-sm sm:text-base text-gray-600 flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              {center.location}
+        {/* LEFT: Map + Heading */}
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-xl shadow border">
+            <h1 className="text-2xl font-bold">{center.name}</h1>
+            <p className="flex items-center gap-1">
+              <MapPin size={16} /> {center.location}
+            </p>
+            <p className="flex items-center gap-1">
+              <Clock size={16} /> {center.hours}
+            </p>
+            <p className="font-medium mt-1">
+              {center.totalTime} | {center.price}
             </p>
           </div>
 
-          {/* Contact Info Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <InfoCard icon={Clock} title="Hours" value={center.hours} />
-            <InfoCard icon={Phone} title="Phone" value={center.phone} />
+          <div className="h-[300px] sm:h-[400px] lg:h-[550px] rounded-xl overflow-hidden relative z-0">
+            <MapContainer
+              center={[center.lat, center.lng]}
+              zoom={13}
+              className="h-full w-full"
+            >
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <Marker position={[center.lat, center.lng]}>
+                <Popup>{center.name}</Popup>
+              </Marker>
+            </MapContainer>
           </div>
+        </div>
 
-          {/* Service Type */}
-          <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4" style={{ fontFamily: 'Bodoni Moda, serif' }}>Choose Service Type</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              {serviceOptions.map(option => {
-                const Icon = option.icon;
-                const isSelected = serviceType === option.id;
-                const isAvailable = option.available;
+        {/* RIGHT: Booking Options */}
+        <div className="space-y-4">
 
-                return isAvailable && (
-                  <button
-                    key={option.id}
-                    onClick={() => isAvailable && setServiceType(option.id as any)}
-                    disabled={!isAvailable}
-                    className={`relative p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 ${
-                      isSelected
-                        ? 'border-[#D4AF37] bg-[#FFF8DC]'
-                        : 'border-gray-200 hover:border-[#D4AF37] hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-2 text-center">
-                      <Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${isSelected ? 'text-[#D4AF37]' : 'text-gray-600'}`} />
-                      <div>
-                        <div className={`font-semibold text-sm sm:text-base ${isSelected ? 'text-[#D4AF37]' : 'text-gray-900'}`}>
-                          {option.label}
-                        </div>
-                        <div className="text-xs sm:text-sm text-gray-500">{option.description}</div>
-                      </div>
-                      {option.extraCharge && (
-                        <div className="text-xs font-medium text-[#D4AF37] bg-[#FFF8DC] px-2 py-1 rounded-full mt-1">
-                          {option.extraCharge}
-                        </div>
-                      )}
-                    </div>
-                    {isSelected && (
-                      <div className="absolute -top-2 -right-2 bg-[#D4AF37] text-white rounded-full p-1">
-                        <Check className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </div>
-                    )}
-                    {!isAvailable && (
-                      <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1">
-                        <X className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+          {/* Vehicle */}
+          <div className="bg-white p-4 rounded-xl shadow border">
+            <label className="font-semibold">Vehicle Type</label>
+            <select
+              value={vehicle}
+              onChange={(e) => setVehicle(e.target.value)}
+              className="w-full border p-2 rounded mt-1"
+            >
+              {center.vehicleTypes.map((v) => (
+                <option key={v}>{v}</option>
+              ))}
+            </select>
           </div>
 
           {/* Services */}
-          <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4" style={{ fontFamily: 'Bodoni Moda, serif' }}>Available Services</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-              {center.services.map((service, idx) => (
-                <div key={idx} className="flex items-center gap-2 p-2 sm:p-3 bg-gray-50 rounded-lg">
-                  <Check className="w-4 h-4 sm:w-5 sm:h-5 text-[#D4AF37] flex-shrink-0" />
-                  <span className="text-sm sm:text-base text-gray-700">{service}</span>
-                </div>
+          <div className="bg-white p-4 rounded-xl shadow border">
+            <h2 className="font-bold mb-2">Select Services</h2>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {center.services.map((s) => (
+                <label
+                  key={s.name}
+                  className="border p-2 rounded flex gap-2 items-center"
+                >
+                  <input
+                    type="checkbox"
+                    checked={services.includes(s.name)}
+                    onChange={() => toggleService(s.name)}
+                  />
+                  <span>{s.name} — ₹{s.price} ({s.time}m)</span>
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 font-semibold">
+              Total: ₹{totalPrice} | {totalTime} min
+            </p>
+          </div>
+
+          {/* Date & Time */}
+          <div className="bg-white p-4 rounded-xl shadow border">
+            <h2 className="font-bold mb-2">Choose Date & Time</h2>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full border p-2 rounded mb-3"
+            />
+
+            <h3 className="font-semibold mb-1">Morning Slots</h3>
+            <div className="flex gap-2 flex-wrap mb-3">
+              {timeSlots.morning.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTime(t)}
+                  className={`px-3 py-1 border rounded ${
+                    time === t ? "bg-[#D4AF37] text-white" : ""
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+
+            <h3 className="font-semibold mb-1">Afternoon Slots</h3>
+            <div className="flex gap-2 flex-wrap">
+              {timeSlots.afternoon.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTime(t)}
+                  className={`px-3 py-1 border rounded ${
+                    time === t ? "bg-[#D4AF37] text-white" : ""
+                  }`}
+                >
+                  {t}
+                </button>
               ))}
             </div>
           </div>
 
-          {/* Pricing */}
-          <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1" style={{ fontFamily: 'Bodoni Moda, serif' }}>Price Range</h2>
-                <p className="text-xl sm:text-2xl font-bold text-[#D4AF37]">{center.price}</p>
-              </div>
-              <div className="p-3 sm:p-4 bg-[#FFF8DC] rounded-xl">
-                <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-[#D4AF37]" />
-              </div>
-            </div>
-          </div>
+          {/* Service Type + Confirm */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h2 className="font-bold mb-2">Service Type</h2>
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => setServiceType("center")}
+                  className={`px-4 py-2 border rounded ${
+                    serviceType === "center" && "bg-[#FFF8DC]"
+                  }`}
+                >
+                  At Center
+                </button>
 
-          {/* Selected Slot */}
-          <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900" style={{ fontFamily: 'Bodoni Moda, serif' }}>Your Selected Slot</h2>
-              <button className="text-sm sm:text-base text-[#D4AF37] hover:text-[#b69530] font-medium">
-                Change
-              </button>
-            </div>
-            <div className="flex items-center gap-3 p-3 sm:p-4 bg-[#FFF8DC] rounded-xl border-2 border-[#D4AF37]">
-              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
-              <span className="text-base sm:text-lg font-semibold text-gray-900">{selectedSlot}</span>
-            </div>
-          </div>
+                {center.pickAndDrop && (
+                  <button
+                    onClick={() => setServiceType("pickDrop")}
+                    className={`px-4 py-2 border rounded ${
+                      serviceType === "pickDrop" && "bg-[#FFF8DC]"
+                    }`}
+                  >
+                    Pick & Drop
+                  </button>
+                )}
 
-          {/* Book Now Button */}
-          <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-200">
-            <button className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:from-[#b69530] hover:to-[#D4AF37] transition-all duration-200 shadow-lg hover:shadow-xl">
+                {center.washAtHome && (
+                  <button
+                    onClick={() => setServiceType("home")}
+                    className={`px-4 py-2 border rounded ${
+                      serviceType === "home" && "bg-[#FFF8DC]"
+                    }`}
+                  >
+                    Wash at Home
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <button
+              onClick={() =>
+                alert(`Booking Confirmed!\nDate: ${date}\nTime: ${time}\nVehicle: ${vehicle}\nServices: ${services.join(", ")}\nService Type: ${serviceType}\nTotal Time: ${totalTime} min\nTotal Amount: ₹${totalPrice}`)
+              }
+              className="bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white px-6 py-2 rounded font-bold whitespace-nowrap"
+            >
               Confirm Booking
             </button>
-            <p className="text-xs sm:text-sm text-gray-500 text-center mt-3">
-              Free cancellation up to 1 hour before your slot
-            </p>
           </div>
-
         </div>
-      </div>
-    </div>
-  );
-}
-
-/* Small reusable card */
-function InfoCard({ icon: Icon, title, value }: any) {
-  return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-3">
-      <div className="p-2 bg-[#FFF8DC] rounded-lg">
-        <Icon className="w-5 h-5 text-[#D4AF37]" />
-      </div>
-      <div>
-        <p className="text-xs text-gray-500 font-medium">{title}</p>
-        <p className="font-medium text-sm text-gray-900">{value}</p>
       </div>
     </div>
   );
