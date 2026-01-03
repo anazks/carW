@@ -1,9 +1,8 @@
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 py-4">
-      <p className="text-center text-sm text-gray-600">
-        © 2026 Car Wash. All rights reserved.
-      </p>
-    </footer>
+<footer className="w-full py-2 bg-gray-100 text-center text-gray-700">
+  © 2026 MyCarWash. All rights reserved.
+</footer>
+
   );
 }

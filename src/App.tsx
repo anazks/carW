@@ -1,76 +1,47 @@
-import NavBar from './Components/NavBar/NavBar';
-import Banner from './Components/Banner/Banner';
-import Card from './Components/Card/Card';
-import Footer from './Components/Footer/Footer';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Detailed from './Components/Detailed/Detailed';
-import History from './Components/History/History';
-import Profile from './Components/Profile/Profile';
-import Login from './Components/Login/Login';
+import NavBar from "./Components/NavBar/NavBar";
+import Banner from "./Components/Banner/Banner";
+import Card from "./Components/Card/Card";
+import Footer from "./Components/Footer/Footer";
+
+import Detailed from "./Components/Detailed/Detailed";
+import History from "./Components/History/History";
+import Profile from "./Components/Profile/Profile";
+import Login from "./Components/Login/Login";
 
 export default function App() {
   return (
     <Router>
-      <Routes>
+      {/* Common layout */}
+      <NavBar />
 
+      <Routes>
+        {/* Home */}
         <Route
           path="/"
           element={
             <>
-              <NavBar />
               <Banner />
               <Card />
-              <Footer />
             </>
           }
         />
 
-        <Route
-          path="/Details"
-          element={
-            <>
-              <NavBar />
-              <Detailed />
-              <Footer />
-            </>
-          }
-        />
+        {/* Details page (IMPORTANT) */}
+        <Route path="/details/:id" element={<Detailed />} />
 
-        <Route
-          path="/History"
-          element={
-            <>
-              <NavBar />
-              <History />
-              <Footer />
-            </>
-          }
-        />
+        {/* History */}
+        <Route path="/history" element={<History />} />
 
-        <Route
-          path="/Profile"
-          element={
-            <>
-              <NavBar />
-              <Profile />
-              <Footer />
-            </>
-          }
-        />
+        {/* Profile */}
+        <Route path="/profile" element={<Profile />} />
 
-        <Route
-          path="/login"
-          element={
-            <>
-              <NavBar />
-              <Login />
-              <Footer />
-            </>
-          }
-        />
-
+        {/* Login */}
+        <Route path="/login" element={<Login />} />
       </Routes>
+
+      <Footer />
     </Router>
   );
 }
