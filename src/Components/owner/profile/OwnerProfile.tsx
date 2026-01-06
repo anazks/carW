@@ -49,7 +49,7 @@ export default function OwnerProfile() {
     { id: 2, name: "Premium Wash", price: "600", durationValue: "1", durationUnit: "hr" },
   ]);
 
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   /* ================= HANDLERS ================= */
   const handleOwnerChange = (field: keyof OwnerInfo, value: string) => {
@@ -75,8 +75,7 @@ export default function OwnerProfile() {
 
   const handleSave = () => {
     setIsEditing(false);
-    alert("Profile & services updated successfully!");
-    // 🔗 API call can go here
+    alert("Profile updated successfully!");
   };
 
   /* ================= UI ================= */
@@ -84,15 +83,16 @@ export default function OwnerProfile() {
     <>
       <OwnerNavbar />
 
-      <div className="min-h-screen bg-gray-50 pt-20 px-4 flex flex-col">
+      <div className="min-h-screen bg-[#FFF4D6] pt-20 px-4 flex flex-col">
         {/* MAIN CONTENT */}
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm p-6 flex-1">
-          {/* HEADER */}
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm p-5 sm:p-6 flex-1 w-full">
           <h1 className="text-2xl font-bold text-gray-800">Shop Owner Profile</h1>
-          <p className="text-sm text-gray-500 mb-6">Manage shop details, timing & services</p>
+          <p className="text-sm text-gray-500 mb-6">
+            Manage shop details, timing & services
+          </p>
 
           {/* PROFILE INFO */}
-          <div className="grid sm:grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <InfoRow icon={<User />} label="Owner Name" value={ownerInfo.name} editable={isEditing} onChange={(v) => handleOwnerChange("name", v)} />
             <InfoRow icon={<Store />} label="Shop Name" value={ownerInfo.shopName} editable={isEditing} onChange={(v) => handleOwnerChange("shopName", v)} />
             <InfoRow icon={<Phone />} label="Phone" value={ownerInfo.phone} editable={isEditing} onChange={(v) => handleOwnerChange("phone", v)} />
@@ -104,7 +104,7 @@ export default function OwnerProfile() {
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
             <Clock className="text-[#D4AF37]" /> Shop Timing
           </h2>
-          <div className="grid sm:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             <TimingField label="Opening Time" type="time" value={ownerInfo.openTime} editable={isEditing} onChange={(v) => handleOwnerChange("openTime", v)} />
             <TimingField label="Closing Time" type="time" value={ownerInfo.closeTime} editable={isEditing} onChange={(v) => handleOwnerChange("closeTime", v)} />
             <TimingField label="Closed On" type="text" value={ownerInfo.closedOn} editable={isEditing} onChange={(v) => handleOwnerChange("closedOn", v)} />
@@ -113,9 +113,13 @@ export default function OwnerProfile() {
           {/* SERVICES */}
           <div className="border-t pt-6">
             <h2 className="text-lg font-semibold mb-4">Services Offered</h2>
+
             <div className="space-y-4">
               {services.map((service) => (
-                <div key={service.id} className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-center">
+                <div
+                  key={service.id}
+                  className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-center"
+                >
                   <input
                     placeholder="Service name"
                     value={service.name}
@@ -123,6 +127,7 @@ export default function OwnerProfile() {
                     onChange={(e) => updateService(service.id, "name", e.target.value)}
                     className="border p-2 rounded"
                   />
+
                   <div className="flex items-center border rounded p-2">
                     <span className="text-gray-500 mr-1">₹</span>
                     <input
@@ -133,6 +138,7 @@ export default function OwnerProfile() {
                       className="w-full outline-none"
                     />
                   </div>
+
                   <div className="flex gap-2">
                     <input
                       type="number"
@@ -144,15 +150,21 @@ export default function OwnerProfile() {
                     <select
                       value={service.durationUnit}
                       disabled={!isEditing}
-                      onChange={(e) => updateService(service.id, "durationUnit", e.target.value as "min" | "hr")}
+                      onChange={(e) =>
+                        updateService(service.id, "durationUnit", e.target.value as "min" | "hr")
+                      }
                       className="border p-2 rounded"
                     >
                       <option value="min">min</option>
                       <option value="hr">hr</option>
                     </select>
                   </div>
+
                   {isEditing && (
-                    <button onClick={() => deleteService(service.id)} className="text-red-500 flex justify-center">
+                    <button
+                      onClick={() => deleteService(service.id)}
+                      className="text-red-500 flex justify-center"
+                    >
                       <Trash2 />
                     </button>
                   )}
@@ -161,28 +173,51 @@ export default function OwnerProfile() {
             </div>
 
             {isEditing && (
-              <button onClick={addService} className="mt-4 flex items-center gap-2 text-[#D4AF37]">
+              <button
+                onClick={addService}
+                className="mt-4 flex items-center gap-2 text-[#D4AF37] font-semibold"
+              >
                 <Plus /> Add Service
               </button>
             )}
           </div>
 
-          {/* ACTIONS */}
-          <div className="mt-6 flex justify-end gap-3">
+          {/* ACTION BUTTONS */}
+          <div className="mt-8 flex flex-col sm:flex-row sm:justify-end gap-3">
             {!isEditing ? (
-              <button className="border px-4 py-2 rounded-lg" onClick={() => setIsEditing(true)}>Edit Profile</button>
+              <button
+                className="w-full sm:w-auto px-5 py-3 sm:py-2 rounded-lg 
+                           bg-[#D4AF37] text-black font-semibold 
+                           hover:bg-[#c9a635] transition"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit Profile
+              </button>
             ) : (
               <>
-                <button className="border px-4 py-2 rounded-lg" onClick={() => setIsEditing(false)}>Cancel</button>
-                <button className="bg-[#D4AF37] text-white px-4 py-2 rounded-lg" onClick={handleSave}>Save Changes</button>
+                <button
+                  className="w-full sm:w-auto px-5 py-3 sm:py-2 
+                             border rounded-lg hover:bg-gray-100"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="w-full sm:w-auto px-5 py-3 sm:py-2 
+                             bg-[#D4AF37] text-black font-semibold 
+                             rounded-lg hover:bg-[#c9a635] transition"
+                  onClick={handleSave}
+                >
+                  Save Changes
+                </button>
               </>
             )}
           </div>
         </div>
 
         {/* FOOTER */}
-        <footer className="mt-4 w-full text-center text-sm text-gray-600 py-3 bg-gray-100">
-          © {new Date().getFullYear()} MyCarWash. All rights reserved.
+        <footer className="mt-6 w-full text-center text-sm text-gray-600 py-3 bg-gray-100">
+          © {new Date().getFullYear()} Sparkle Car Wash. All rights reserved.
         </footer>
       </div>
     </>
@@ -190,20 +225,30 @@ export default function OwnerProfile() {
 }
 
 /* ================= REUSABLE COMPONENTS ================= */
-interface InfoRowProps {
+function InfoRow({
+  icon,
+  label,
+  value,
+  editable,
+  onChange,
+}: {
   icon: React.ReactNode;
   label: string;
   value: string;
   editable: boolean;
   onChange: (value: string) => void;
-}
-
-function InfoRow({ icon, label, value, editable, onChange }: InfoRowProps) {
+}) {
   return (
     <div>
-      <p className="text-sm text-gray-500 flex items-center gap-2">{icon} {label}</p>
+      <p className="text-sm text-gray-500 flex items-center gap-2">
+        {icon} {label}
+      </p>
       {editable ? (
-        <input value={value} onChange={(e) => onChange(e.target.value)} className="w-full border p-2 rounded mt-1" />
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full border p-2 rounded mt-1"
+        />
       ) : (
         <p className="font-medium mt-1">{value}</p>
       )}
@@ -211,20 +256,29 @@ function InfoRow({ icon, label, value, editable, onChange }: InfoRowProps) {
   );
 }
 
-interface TimingFieldProps {
+function TimingField({
+  label,
+  type,
+  value,
+  editable,
+  onChange,
+}: {
   label: string;
   type: string;
   value: string;
   editable: boolean;
   onChange: (value: string) => void;
-}
-
-function TimingField({ label, type, value, editable, onChange }: TimingFieldProps) {
+}) {
   return (
     <div>
       <p className="text-sm text-gray-500">{label}</p>
       {editable ? (
-        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="w-full border p-2 rounded mt-1" />
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full border p-2 rounded mt-1"
+        />
       ) : (
         <p className="font-medium mt-1">{value}</p>
       )}

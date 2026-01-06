@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import OwnerNavbar from "../Layout/OwnerNavBar";
 
+/* ================= TYPES ================= */
 type Booking = {
   id: number;
   customer: string;
@@ -12,6 +14,8 @@ type Booking = {
 };
 
 export default function OwnerBookings() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   const [bookings, setBookings] = useState<Booking[]>([
     {
       id: 1,
@@ -44,19 +48,26 @@ export default function OwnerBookings() {
 
   const updateStatus = (id: number, status: Booking["status"]) => {
     setBookings((prev) =>
-      prev.map((b) =>
-        b.id === id ? { ...b, status } : b
-      )
+      prev.map((b) => (b.id === id ? { ...b, status } : b))
     );
+  };
+
+  /* 🔥 SCROLL HANDLER */
+  const scrollTable = (direction: "left" | "right") => {
+    if (!scrollRef.current) return;
+
+    scrollRef.current.scrollBy({
+      left: direction === "left" ? -300 : 300,
+      behavior: "smooth",
+    });
   };
 
   return (
     <>
       <OwnerNavbar />
 
-      <div className="min-h-screen bg-gray-50 pt-20 px-4">
-        <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-sm p-6">
-
+      <div className="min-h-screen bg-gray-50 pt-20 px-4 flex flex-col overflow-x-hidden">
+        <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-sm p-6 flex-1 w-full">
           <h1 className="text-2xl font-bold text-gray-800 mb-1">
             Bookings
           </h1>
@@ -64,64 +75,111 @@ export default function OwnerBookings() {
             Manage customer bookings
           </p>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left border-b text-gray-500">
-                  <th className="py-3">Customer</th>
-                  <th>Car No</th>
-                  <th>Service</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Status</th>
-                  <th className="text-right">Action</th>
-                </tr>
-              </thead>
+          {/* TABLE WRAPPER */}
+          <div className="relative">
 
-              <tbody>
-                {bookings.map((b) => (
-                  <tr key={b.id} className="border-b last:border-none">
-                    <td className="py-3 font-medium">{b.customer}</td>
-                    <td>{b.carNumber}</td>
-                    <td>{b.service}</td>
-                    <td>{b.date}</td>
-                    <td>{b.time}</td>
-                    <td>
-                      <StatusBadge status={b.status} />
-                    </td>
-                    <td className="text-right">
-                      {b.status !== "Completed" && (
-                        <button
-                          onClick={() =>
-                            updateStatus(
-                              b.id,
-                              b.status === "Pending"
-                                ? "In Progress"
-                                : "Completed"
-                            )
-                          }
-                          className="px-3 py-1 text-xs rounded-lg bg-[#D4AF37] text-white"
-                        >
-                          {b.status === "Pending" ? "Start" : "Complete"}
-                        </button>
-                      )}
-                    </td>
+{/* LEFT ARROW — MOBILE ONLY */}
+<button
+  onClick={() => scrollTable("left")}
+  className="
+    absolute left-1 top-1/2 -translate-y-1/2 z-10
+    bg-[#FFF4D6] border border-[#E6C86E]
+    rounded-full p-2
+    text-[#D4AF37]
+    shadow-sm
+    hover:bg-[#FFE8A3]
+    lg:hidden
+  "
+>
+  <ChevronLeft size={18} />
+</button>
+
+{/* RIGHT ARROW — MOBILE ONLY */}
+<button
+  onClick={() => scrollTable("right")}
+  className="
+    absolute right-1 top-1/2 -translate-y-1/2 z-10
+    bg-[#FFF4D6] border border-[#E6C86E]
+    rounded-full p-2
+    text-[#D4AF37]
+    shadow-sm
+    hover:bg-[#FFE8A3]
+    lg:hidden
+  "
+>
+  <ChevronRight size={18} />
+</button>
+
+
+            {/* SCROLL AREA */}
+            <div
+              ref={scrollRef}
+              className="overflow-x-auto px-8 scroll-smooth"
+            >
+              <table className="min-w-[700px] w-full text-sm border-collapse">
+                <thead>
+                  <tr className="text-left border-b text-gray-500">
+                    <th className="py-3">Customer</th>
+                    <th>Car No</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th className="pl-2">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
 
+                <tbody>
+                  {bookings.map((b) => (
+                    <tr
+                      key={b.id}
+                      className="border-b last:border-none hover:bg-gray-50"
+                    >
+                      <td className="py-3 font-medium">{b.customer}</td>
+                      <td>{b.carNumber}</td>
+                      <td>{b.service}</td>
+                      <td>{b.date}</td>
+                      <td>{b.time}</td>
+                      <td>
+                        <StatusBadge status={b.status} />
+                      </td>
+                      <td className="pl-2">
+                        {b.status !== "Completed" && (
+                          <button
+                            onClick={() =>
+                              updateStatus(
+                                b.id,
+                                b.status === "Pending"
+                                  ? "In Progress"
+                                  : "Completed"
+                              )
+                            }
+                            className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-[#D4AF37] text-white whitespace-nowrap"
+                          >
+                            {b.status === "Pending"
+                              ? "Start"
+                              : "Complete"}
+                            <ArrowRight size={14} />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
-      <footer className="fixed bottom-0 left-0 w-full text-center text-sm text-gray-600 py-3 bg-gray-100">
-        © {new Date().getFullYear()} MyCarWash. All rights reserved.
-      </footer>
+        <footer className="w-full text-center text-sm text-gray-600 py-3 bg-gray-100 mt-6">
+          © {new Date().getFullYear()} Sparkle Car Wash
+        </footer>
       </div>
     </>
   );
 }
 
+/* ===== STATUS BADGE ===== */
 function StatusBadge({ status }: { status: Booking["status"] }) {
   const map = {
     Pending: "bg-yellow-100 text-yellow-700",

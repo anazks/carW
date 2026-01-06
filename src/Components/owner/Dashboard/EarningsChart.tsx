@@ -7,7 +7,6 @@ const data = [
   { day: "Thu", earnings: 4000 },
   { day: "Fri", earnings: 6000 },
   { day: "Sat", earnings: 7000 },
-  { day: "Sun", earnings: 5000 },
 ];
 
 export default function EarningsChart() {

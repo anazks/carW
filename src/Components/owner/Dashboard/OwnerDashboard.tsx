@@ -1,7 +1,7 @@
 import { Car, Calendar, IndianRupee, Clock, Bell } from "lucide-react";
 import OwnerNavBar from "../Layout/OwnerNavBar";
 import EarningsChart from "./EarningsChart";
-// import WashCenterSelector from "./WashCenterSelector"; // removed
+// import WashCenterSelector from "./WashCenterSelector"; // 
 import Notifications from "./Notification";
 
 export default function OwnerDashboard() {
@@ -40,9 +40,10 @@ export default function OwnerDashboard() {
       </div>
 
       {/* FOOTER */}
-      <footer className="fixed bottom-0 left-0 w-full text-center text-sm text-gray-600 py-3 bg-gray-100">
-        © {new Date().getFullYear()} MyCarWash. All rights reserved.
-      </footer>
+      <footer className="w-full text-center text-sm text-gray-600 py-3 bg-gray-100 mt-6">
+  © {new Date().getFullYear()} Sparkle Car Wash. All rights reserved.
+</footer>
+
     </>
   );
 }
