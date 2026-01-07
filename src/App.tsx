@@ -10,38 +10,84 @@ import History from "./Components/History/History";
 import Profile from "./Components/Profile/Profile";
 import Login from "./Components/Login/Login";
 
+/* OWNER */
+import OwnerLogin from "./Components/owner/Login/Ownerlogin";
+import OwnerDashboard from "./Components/owner/Dashboard/OwnerDashboard";
+import OwnerBookings from "./Components/owner/Bookings/OwnerBookings";
+import OwnerProfile from "./Components/owner/profile/OwnerProfile";
+
+
 export default function App() {
   return (
     <Router>
-      {/* Common layout */}
-      <NavBar />
-
       <Routes>
-        {/* Home */}
+
+        {/* ================= USER SIDE ================= */}
         <Route
           path="/"
           element={
             <>
+              <NavBar />
               <Banner />
               <Card />
+              <Footer />
             </>
           }
         />
 
-        {/* Details page (IMPORTANT) */}
-        <Route path="/details/:id" element={<Detailed />} />
+        <Route
+          path="/details/:id"
+          element={
+            <>
+              <NavBar />
+              <Detailed />
+              <Footer />
+            </>
+          }
+        />
 
-        {/* History */}
-        <Route path="/history" element={<History />} />
+        <Route
+          path="/history"
+          element={
+            <>
+              <NavBar />
+              <History />
+              <Footer />
+            </>
+          }
+        />
 
-        {/* Profile */}
-        <Route path="/profile" element={<Profile />} />
+        <Route
+          path="/profile"
+          element={
+            <>
+              <NavBar />
+              <Profile />
+              <Footer />
+            </>
+          }
+        />
 
-        {/* Login */}
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={
+            <>
+              <NavBar />
+              <Login />
+              <Footer />
+            </>
+          }
+        />
+
+        {/* ================= OWNER SIDE ================= */}
+        {/* NO NAVBAR / FOOTER HERE */}
+        <Route path="/owner/login" element={<OwnerLogin />} />
+        <Route path="/owner" element={<OwnerDashboard />} />
+        <Route path="/owner/bookings" element={<OwnerBookings />} />
+        <Route path="/owner/profile" element={<OwnerProfile />} />
+
+
       </Routes>
-
-      <Footer />
     </Router>
   );
 }

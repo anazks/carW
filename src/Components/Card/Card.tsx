@@ -127,7 +127,7 @@ export default function Card() {
 
                   {/* 🔥 Redirect to detailed page */}
                   <button
-                    onClick={() => navigate(`/details/${center.id}`)}
+                    onClick={() => navigate(`/Details/${center.id}`)}
                     className="px-3 py-1.5 text-xs font-semibold bg-black text-white rounded-md hover:bg-gray-800"
                   >
                     Book Now
