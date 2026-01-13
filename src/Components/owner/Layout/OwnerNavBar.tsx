@@ -1,33 +1,33 @@
-import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LogOut, Home, Calendar, User } from "lucide-react";
+"use client"
+
+import { useState } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import { LogOut, Home, Calendar, User, Clock } from "lucide-react"
 
 export default function OwnerNavBar() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useNavigate()
+  const location = useLocation()
 
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const navItems = [
     { label: "Dashboard", path: "/owner", icon: <Home size={16} /> },
+    { label: "Services", path: "/owner/services", icon: <User size={16} /> },
+    { label: "Time Slots", path: "/owner/TimeSlots", icon: <Clock size={16} /> },
     { label: "Bookings", path: "/owner/bookings", icon: <Calendar size={16} /> },
     { label: "Profile", path: "/owner/profile", icon: <User size={16} /> },
-  ];
+  ]
 
   const handleLogout = () => {
-    // ✅ Clear any auth tokens here if using auth
-    navigate("/owner/login");
-  };
+    navigate("/owner/login")
+  }
 
   return (
     <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-
           {/* LOGO */}
-          <div className="flex-shrink-0 font-bold text-xl text-[#D4AF37] cursor-pointer">
-            Sparkle Car Wash
-          </div>
+          <div className="flex-shrink-0 font-bold text-xl text-[#D4AF37] cursor-pointer">Sparkle Car Wash</div>
 
           {/* MENU ITEMS */}
           <div className="hidden md:flex space-x-6 items-center">
@@ -64,19 +64,9 @@ export default function OwnerNavBar() {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 {menuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                 )}
               </svg>
             </button>
@@ -108,5 +98,5 @@ export default function OwnerNavBar() {
         </div>
       )}
     </nav>
-  );
+  )
 }

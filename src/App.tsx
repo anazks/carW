@@ -6,6 +6,7 @@ import Card from "./Components/Card/Card";
 import Footer from "./Components/Footer/Footer";
 
 import Detailed from "./Components/Detailed/Detailed";
+import Services from "./Components/services/Services";   // <-- add this import
 import History from "./Components/History/History";
 import Profile from "./Components/Profile/Profile";
 import Login from "./Components/Login/Login";
@@ -15,7 +16,9 @@ import OwnerLogin from "./Components/owner/Login/Ownerlogin";
 import OwnerDashboard from "./Components/owner/Dashboard/OwnerDashboard";
 import OwnerBookings from "./Components/owner/Bookings/OwnerBookings";
 import OwnerProfile from "./Components/owner/profile/OwnerProfile";
-
+import OwnerServices from "./Components/owner/services/services";
+// import TimeSlot from "./Components/owner/services/TimeSlot";
+import OwnerTimeSlots from "./Components/owner/TimeSlots/TimeSlot";
 
 export default function App() {
   return (
@@ -41,6 +44,17 @@ export default function App() {
             <>
               <NavBar />
               <Detailed />
+              <Footer />
+            </>
+          }
+        />
+
+        <Route
+          path="/services"
+          element={
+            <>
+              <NavBar />
+              <Services />   {/* <-- new Services page */}
               <Footer />
             </>
           }
@@ -85,7 +99,8 @@ export default function App() {
         <Route path="/owner" element={<OwnerDashboard />} />
         <Route path="/owner/bookings" element={<OwnerBookings />} />
         <Route path="/owner/profile" element={<OwnerProfile />} />
-
+        <Route path="/owner/services" element={<OwnerServices />} />
+        <Route path="/owner/TimeSlots" element={<OwnerTimeSlots />} />
 
       </Routes>
     </Router>

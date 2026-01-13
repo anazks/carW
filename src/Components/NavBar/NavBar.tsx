@@ -16,7 +16,7 @@ export default function NavBar() {
 
   const navLinks = [
     { path: '/', label: 'Home', icon: Home },
-    { path: '/Details', label: 'Services', icon: Droplet },
+    { path: '/services', label: 'Services', icon: Droplet },
     { path: '/History', label: 'History', icon: History },
     { path: '/Profile', label: 'Profile', icon: User }
   ];
