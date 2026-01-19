@@ -19,6 +19,7 @@
     "react-leaflet": "^5.0.0",
     "react-razorpay": "^3.0.1",
     "react-router-dom": "^6.30.1",
+    "reactjs-alert": "^2.5.2",
     "recharts": "^3.6.0",
     "tailwindcss": "^4.1.17"
   },
