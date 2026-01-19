@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Check } from "lucide-react";
+import { Check } from "lucide-react";
+import { userLogin } from '../../Api/Auth';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Context/UserContext";
 
 export default function LoginPage() {
-  const [step, setStep] = useState<number>(1);
+  const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
-  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
+  const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const { token, setToken } = useAuth();
 
   // 🔒 Disable scroll
   useEffect(() => {
@@ -17,142 +22,110 @@ export default function LoginPage() {
     };
   }, []);
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (/^\d?$/.test(value)) {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
-      if (value && index < 5) {
-        document.getElementById(`otp-${index + 1}`)?.focus();
-      }
+  // Redirect if already logged in
+  useEffect(() => {
+    if (token) {
+      navigate("/");
     }
-  };
+  }, [token, navigate]);
 
-  const handleOtpKeyDown = (
-    index: number,
-    e: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      document.getElementById(`otp-${index - 1}`)?.focus();
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError("Please enter email and password.");
+      return;
     }
-  };
-
-  const handleSendOtp = () => {
-    if (!email) return;
     setLoading(true);
-
-    setTimeout(() => {
+    setError("");
+    try {
+      const response = await userLogin({ email, password });
+      console.log("Login successful:----------", response);
+      setToken(response.result.token);
+      localStorage.setItem("email", email);
+      navigate("/");
+    } catch (err) {
+      setError("Login failed. Please check your credentials.");
+      console.error("Login error:", err);
+    } finally {
       setLoading(false);
-      setStep(2);
-    }, 1200);
-  };
-
-  const handleVerifyOtp = () => {
-    if (otp.some((d) => !d)) return;
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-      alert("Login successful");
-      // navigate("/")
-    }, 1200);
+    }
   };
 
   const resetForm = () => {
-    setStep(1);
     setEmail("");
-    setOtp(["", "", "", "", "", ""]);
+    setPassword("");
+    setError("");
   };
 
   return (
     <div className="min-h-screen w-full bg-white font-[Bodoni_Moda] relative">
-
       <div className="flex justify-center pt-5 pb-24">
         <div className="w-full max-w-xs bg-white rounded-2xl shadow-lg px-4 py-4">
-
           <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">
             Login
           </h2>
-
-          {step === 1 ? (
-            <div className="space-y-4">
-              {/* EMAIL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-[#D4AF37]"
-                  style={{ backgroundColor: "#FFF4D6" }}
-                />
-              </div>
-
-              {/* SEND OTP */}
-              <button
-                onClick={handleSendOtp}
-                disabled={loading || !email}
-                className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-2 rounded-lg font-semibold disabled:opacity-50"
-              >
-                {loading ? "Sending..." : "Send OTP"}
-              </button>
-
-              <div className="text-center text-sm text-gray-500">or</div>
-
-              <button
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2 border py-2 rounded-lg font-semibold hover:bg-gray-50"
-              >
-                Continue with Google
-              </button>
+          <div className="space-y-4">
+            {/* EMAIL */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                style={{ backgroundColor: "#FFF4D6" }}
+              />
             </div>
-          ) : (
-            <div className="space-y-4">
-              <button
-                onClick={resetForm}
-                className="flex items-center gap-2 text-[#D4AF37] font-medium"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </button>
-
-              <p className="text-sm text-gray-600">
-                Enter the 6-digit code sent to{" "}
-                <span className="font-semibold">{email}</span>
-              </p>
-
-              <div className="flex justify-between gap-2">
-                {otp.map((digit, index) => (
-                  <input
-                    key={index}
-                    id={`otp-${index}`}
-                    type="text"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    className="w-9 h-10 text-center text-lg font-bold rounded-lg outline-none focus:ring-2 focus:ring-[#D4AF37]"
-                    style={{ backgroundColor: "#FFF4D6" }}
-                  />
-                ))}
-              </div>
-
-              <button
-                onClick={handleVerifyOtp}
-                disabled={loading || otp.some((d) => !d)}
-                className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <Check className="w-5 h-5" />
-                Verify & Continue
-              </button>
+            {/* PASSWORD */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="w-full px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                style={{ backgroundColor: "#FFF4D6" }}
+              />
             </div>
-          )}
+            {/* ERROR MESSAGE */}
+            {error && (
+              <div className="text-red-500 text-sm text-center">{error}</div>
+            )}
+            {/* LOGIN BUTTON */}
+            <button
+              onClick={handleLogin}
+              disabled={loading || !email || !password}
+              className="w-full bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {loading ? "Logging in..." : (
+                <>
+                  <Check className="w-5 h-5" />
+                  Login
+                </>
+              )}
+            </button>
+            <div className="text-center text-sm text-gray-500">or</div>
+            <button
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 border py-2 rounded-lg font-semibold hover:bg-gray-50"
+            >
+              Continue with Google
+            </button>
+            {/* RESET LINK */}
+            <button
+              onClick={resetForm}
+              className="w-full text-[#D4AF37] font-medium text-xs text-center underline"
+            >
+              Reset Form
+            </button>
+          </div>
         </div>
       </div>
-
       <footer className="fixed bottom-0 left-0 w-full text-center text-sm text-gray-600 py-3 bg-gray-100">
         © {new Date().getFullYear()} MyCarWash. All rights reserved.
       </footer>
