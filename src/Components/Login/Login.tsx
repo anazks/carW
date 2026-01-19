@@ -38,8 +38,9 @@ export default function LoginPage() {
     setError("");
     try {
       const response = await userLogin({ email, password });
-      console.log("Login successful:", response);
+      console.log("Login successful:----------", response);
       setToken(response.result.token);
+      localStorage.setItem("email", email);
       navigate("/");
     } catch (err) {
       setError("Login failed. Please check your credentials.");

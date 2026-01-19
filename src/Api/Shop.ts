@@ -43,3 +43,16 @@ export const getShopServices = async (shopId: string) => {
     throw error;
   }
 };
+
+export const getAvailbleSlots = async (shopId: string, bookingDate: string) => {
+  try {
+    console.log("Fetching available slots for shop ID:", shopId, "on date:", bookingDate);
+    let data = { shopId, bookingDate };
+    const response = await Axios.post("/booking/fetchAllAvailableTimeSlots", data);
+    console.log("API response for available slots:", response);
+    return response; // { success, message, data }
+  } catch (error) {
+    console.error("Error fetching available slots:", error);
+    throw error;
+  }
+}
