@@ -10,8 +10,8 @@ const userLogin = async (data: { email: string; password: string }) => {
 const getProfile = async () => {
   try {
     const response = await Axios.get("/auth/user/getProfile/");
-    console
-    return response.data;
+    console.log(response.data);
+    return response;
   } catch (error) {
     throw error;
   }

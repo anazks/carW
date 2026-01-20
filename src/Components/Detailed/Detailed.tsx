@@ -1,12 +1,11 @@
 "use client"
 
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { MapPin, Clock, Users, Phone, ChevronLeft, Calendar, CheckCircle2, Star, Globe, Award, X } from "lucide-react"
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
 import { useParams, useNavigate } from "react-router-dom"
 import { getShopDetails, getShopServices, getAvailbleSlots } from '../../Api/Shop'
 import { createBooking, createOrder, verifyPayment } from '../../Api/Booking'
-import { useRazorpay } from "react-razorpay"
 
 import "leaflet/dist/leaflet.css"
 
@@ -35,6 +34,18 @@ type TimeSlot = { time: string; availableSlots: number }
 type TimeSlots = { morning: TimeSlot[]; afternoon: TimeSlot[] }
 type FreeSlot = { from: string; to: string }
 type PaymentOption = 'slot' | 'full'
+type RazorpayResponse = {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+// Declare Razorpay type
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 // Sub-components
 const LoadingSpinner = () => (
@@ -573,11 +584,43 @@ export default function Detailed() {
   const [serviceType, setServiceType] = useState<"center" | "pickDrop" | "home">("center")
   const [timeSlots, setTimeSlots] = useState<TimeSlots>(DEFAULT_TIME_SLOTS)
   const [paymentOption, setPaymentOption] = useState<PaymentOption>('slot')
-  // Assume userId from auth context/localStorage; replace with actual auth logic
-  const userId = useMemo(() => localStorage.getItem('userId') || 'temp-user-id', []) // TODO: Integrate with auth
-  const email = useMemo(() => localStorage.getItem('email') || 'customer@example.com', []) // From localStorage
+  const [processingPayment, setProcessingPayment] = useState(false)
+  const razorpayLoaded = useRef(false)
+  
+  // Assume userId from auth context/localStorage
+  const userId = useMemo(() => localStorage.getItem('userId') || 'temp-user-id', [])
+  const email = useMemo(() => localStorage.getItem('email') || 'customer@example.com', [])
+  const userName = useMemo(() => localStorage.getItem('name') || 'Customer', [])
+  const userPhone = useMemo(() => localStorage.getItem('phone') || '9999999999', [])
 
-  const { error, isLoading: razorpayLoading } = useRazorpay()
+  // Derived values
+  const pickAndDrop = useMemo(() => center?.pickAndDrop || DEFAULT_PICK_DROP, [center])
+  const washAtHome = useMemo(() => center?.washAtHome || DEFAULT_WASH_HOME, [center])
+  const canBook = useMemo(() => services.length > 0 && date && time, [services, date, time])
+  const servicesSelected = useMemo(() => services.length > 0, [services])
+
+  // Load Razorpay script
+  useEffect(() => {
+    if (razorpayLoaded.current) return
+
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.async = true
+    script.onload = () => {
+      console.log('Razorpay script loaded successfully')
+      razorpayLoaded.current = true
+    }
+    script.onerror = () => {
+      console.error('Failed to load Razorpay script')
+    }
+    document.body.appendChild(script)
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script)
+      }
+    }
+  }, [])
 
   // Function to generate TimeSlots from API schedule
   const generateTimeSlots = useCallback((schedule: any): TimeSlots => {
@@ -586,13 +629,11 @@ export default function Detailed() {
       return DEFAULT_TIME_SLOTS
     }
 
-    // Helper to parse HH:MM to minutes since midnight
     const parseTime = (timeStr: string): number => {
       const [hours, minutes] = timeStr.split(':').map(Number)
       return hours * 60 + minutes
     }
 
-    // Helper to format minutes to "H:MM AM/PM"
     const formatTime = (minutes: number): string => {
       let hours = Math.floor(minutes / 60)
       const mins = (minutes % 60).toString().padStart(2, '0')
@@ -609,10 +650,9 @@ export default function Detailed() {
       let currentMin = parseTime(freeSlot.from)
       const endMin = parseTime(freeSlot.to)
 
-      // Generate 30-minute slots within the free period
       while (currentMin + 30 <= endMin) {
         const slotTime = formatTime(currentMin)
-        const availableSlots = 4 // Fixed; adjust as needed
+        const availableSlots = 4
         const slot: TempSlot = { time: slotTime, availableSlots, minutes: currentMin }
 
         if (currentMin < 12 * 60) {
@@ -625,14 +665,13 @@ export default function Detailed() {
       }
     })
 
-    // Sort by minutes and map back to TimeSlot
     const sortedMorning = morning.sort((a, b) => a.minutes - b.minutes).map(({ time, availableSlots }) => ({ time, availableSlots }))
     const sortedAfternoon = afternoon.sort((a, b) => a.minutes - b.minutes).map(({ time, availableSlots }) => ({ time, availableSlots }))
 
     return { morning: sortedMorning, afternoon: sortedAfternoon }
   }, [])
 
-  // All hooks hoisted to top
+  // Fetch shop data
   const fetchData = useCallback(async () => {
     if (!id) return
     try {
@@ -650,6 +689,7 @@ export default function Detailed() {
     }
   }, [id])
 
+  // Fetch available slots
   const fetchAvailableSlots = useCallback(async (shopId: string, bookingDate: string) => {
     if (!shopId || !bookingDate) return
     try {
@@ -676,7 +716,7 @@ export default function Detailed() {
     fetchData()
   }, [fetchData])
 
-  // Fetch slots only after date and services are selected
+  // Fetch slots when date or services change
   useEffect(() => {
     if (center?._id && date && services.length > 0) {
       fetchAvailableSlots(center._id, date)
@@ -685,6 +725,7 @@ export default function Detailed() {
     }
   }, [center, date, services.length, fetchAvailableSlots])
 
+  // Process shop services
   const shopServices = useMemo((): ShopService[] => 
     shopServicesRaw.map(s => ({
       _id: s._id,
@@ -695,12 +736,14 @@ export default function Detailed() {
     })), 
   [shopServicesRaw])
 
+  // Calculate totals
   const totals = useMemo(() => {
     const totalPrice = services.reduce((sum, s) => sum + s.price, 0)
     const totalTime = services.reduce((sum, s) => sum + s.duration, 0)
     return { totalPrice, totalTime }
   }, [services])
 
+  // Reset form when center changes
   useEffect(() => {
     if (center) {
       setVehicle(DEFAULT_VEHICLE_TYPES[0])
@@ -713,6 +756,7 @@ export default function Detailed() {
     }
   }, [center])
 
+  // Toggle service selection
   const toggleService = useCallback((service: SelectedService) => {
     setServices((prev) => 
       prev.some((s) => s.id === service.id) 
@@ -721,21 +765,18 @@ export default function Detailed() {
     )
   }, [])
 
+  // Change vehicle type
   const handleVehicleChange = useCallback((newVehicle: string) => {
     setVehicle(newVehicle)
     setServices([])
   }, [])
 
+  // Filter services by vehicle type
   const filteredServices = useMemo(() => 
     shopServices.filter((service) => service.vehicleType.includes(vehicle)),
   [shopServices, vehicle])
 
-  const pickAndDrop = useMemo(() => center?.pickAndDrop || DEFAULT_PICK_DROP, [center])
-  const washAtHome = useMemo(() => center?.washAtHome || DEFAULT_WASH_HOME, [center])
-  const canBook = useMemo(() => services.length > 0 && date && time, [services, date, time])
-  const servicesSelected = useMemo(() => services.length > 0, [services])
-
-  // Parse time to minutes for end time calculation
+  // Parse time to minutes
   const parseTimeToMinutes = useCallback((timeStr: string): number => {
     const [timePart, period] = timeStr.split(' ')
     let [hours, minutes] = timePart.split(':').map(Number)
@@ -744,8 +785,39 @@ export default function Detailed() {
     return hours * 60 + minutes
   }, [])
 
+  // Close confirmation modal
+  const closeConfirmModal = useCallback(() => {
+    setShowConfirmModal(false)
+  }, [])
+
+  // Open confirmation modal
+  const openConfirmModal = useCallback(() => {
+    if (canBook && center) {
+      setShowConfirmModal(true)
+    }
+  }, [canBook, center])
+
+  // Main booking handler - NEW FLOW: Create booking first
   const handleBook = useCallback(async () => {
-    if (canBook && center && services.length > 0 && !razorpayLoading) {
+    if (!canBook || !center || services.length === 0 || processingPayment) {
+      return
+    }
+
+    // Check if Razorpay is loaded
+    if (!razorpayLoaded.current) {
+      alert('Payment system is still loading. Please try again in a moment.')
+      return
+    }
+
+    if (!window.Razorpay) {
+      alert('Payment system is not available. Please refresh the page and try again.')
+      return
+    }
+
+    setProcessingPayment(true)
+    closeConfirmModal()
+
+    try {
       // Calculate start and end times
       const startMinutes = parseTimeToMinutes(time)
       const startDate = new Date(date)
@@ -753,18 +825,57 @@ export default function Detailed() {
       const endDate = new Date(startDate)
       endDate.setMinutes(endDate.getMinutes() + totals.totalTime)
 
+      // Calculate payment amounts
       const amountToPay = paymentOption === 'slot' ? SLOT_BOOKING_AMOUNT : totals.totalPrice
       const remainingAmount = paymentOption === 'slot' ? totals.totalPrice - SLOT_BOOKING_AMOUNT : 0
-      const description = paymentOption === 'slot' 
-        ? `Slot booking for ${vehicle} - ${services.map(s => s.name).join(', ')} (₹${amountToPay} advance)`
-        : `Full booking for ${vehicle} - ${services.map(s => s.name).join(', ')}`
+      
+      // Step 1: First create the booking with pending status
+      const bookingData = {
+        userId,
+        shopId: center._id,
+        serviceIds: services.map(s => s.id),
+        services: services.map(s => ({
+          id: s.id,
+          name: s.name,
+          price: s.price,
+          duration: s.duration
+        })),
+        bookingDate: date,
+        timeSlot: {
+          startingTime: startDate.toISOString(),
+          endingTime: endDate.toISOString()
+        },
+        totalPrice: totals.totalPrice,
+        totalDuration: totals.totalTime,
+        paymentType: 'full', // Use 'full' for now, backend can handle partial later
+        amountToPay,
+        remainingAmount,
+        currency: "INR",
+        serviceType,
+        vehicle,
+        status: 'pending', // Initial status
+        originalPaymentOption: paymentOption // Keep original for reference
+      }
 
-      // Prepare order data (minimal for Razorpay order creation)
+      console.log("Creating booking first with data:", bookingData)
+      
+      // Create booking and keep the booking ID
+      const bookingResponse = await createBooking(bookingData)
+      console.log("Booking creation response:", bookingResponse)
+     if (bookingResponse?.status !== 200 || !bookingResponse.data?.success) {
+        throw new Error('Failed to create booking. Please try again.')
+      }
+
+      const bookingId = bookingResponse.data.BookingStatus._id;
+      console.log("Booking created with ID:", bookingId)
+
+      // Step 2: Create Razorpay order
       const orderData = {
         amount: amountToPay * 100, // In paise
         currency: "INR",
-        receipt: `booking-${Date.now()}`, // Unique receipt ID
+        receipt: `booking-${bookingId}`,
         notes: {
+          bookingId, // Include booking ID in notes
           userId,
           shopId: center._id,
           vehicle,
@@ -772,137 +883,132 @@ export default function Detailed() {
           bookingDate: date,
           timeSlot: { startingTime: startDate.toISOString(), endingTime: endDate.toISOString() },
           serviceType,
-          paymentType: paymentOption,
-          remainingAmount
+          paymentType: 'full',
+          remainingAmount,
+          totalPrice: totals.totalPrice,
+          totalTime: totals.totalTime,
+          originalPaymentOption: paymentOption
         }
       }
 
-      console.log("Prepared order data:", orderData)
-      try {
-        // Step 1: Call createOrder to get Razorpay orderId
-        const orderResponse = await createOrder(orderData)
-        console.log("Order response:", orderResponse)
-        if (orderResponse?.status !== 200 || !orderResponse.data?.id) {
-          throw new Error('Failed to create order')
-        }
+      console.log("Creating Razorpay order with data:", orderData)
+      const orderResponse = await createOrder(orderData)
+      
+      if (!orderResponse?.data?.id) {
+        // If order creation fails, we might want to update booking status to failed
+        throw new Error('Failed to create payment order')
+      }
 
-        const razorpayOrderId = orderResponse.data.id
-        console.log("Razorpay Order ID:", razorpayOrderId)
+      const razorpayOrderId = orderResponse.data.id
+      console.log("Created Razorpay order:", razorpayOrderId)
 
-        // Step 2: Open Razorpay with the orderId
-        const options = {
-          key: "rzp_test_fccR1aGiSJLS1e" || process.env.REACT_APP_RAZORPAY_KEY, // Use env var in production
-          amount: amountToPay * 100, // Amount in paise
-          currency: "INR",
-          name: center.ShopName,
-          description,
-          order_id: razorpayOrderId,
-          prefill: {
-            name: localStorage.getItem('name') || "Customer Name", // From localStorage if available
-            email,
-            contact: localStorage.getItem('phone') || "9999999999", // From localStorage if available
-          },
-          theme: {
-            color: "#D4AF37",
-          },
-          modal: {
-            ondismiss: () => {
-              // Optional: Handle payment dismissal (e.g., cancel order if needed)
-              console.log('Payment dismissed')
-            }
-          }
-        };
-
-        const rzp = new (window as any).Razorpay(options); // Use window.Razorpay if useRazorpay hook issues
-        rzp.open();
-
-        rzp.on('payment.success', async (paymentResponse: any) => {
-          console.log("Payment response:", paymentResponse);
+      // Step 3: Initialize Razorpay payment
+      const options = {
+        key: "rzp_test_fccR1aGiSJLS1e",
+        amount: amountToPay * 100,
+        currency: "INR",
+        name: center.ShopName,
+        description: `Booking #${bookingId} - ${vehicle} services`,
+        order_id: razorpayOrderId,
+        prefill: {
+          name: userName,
+          email,
+          contact: userPhone,
+        },
+        theme: {
+          color: "#D4AF37",
+        },
+        handler: async (response: RazorpayResponse) => {
+          console.log("Payment successful, verifying...", response)
           
-          // Step 3: Verify payment on backend
+          // Step 4: Verify payment with booking ID
           const verifyData = {
-            razorpayOrderId: paymentResponse.razorpay_order_id,
-            razorpayPaymentId: paymentResponse.razorpay_payment_id,
-            razorpaySignature: paymentResponse.razorpay_signature,
-            email // Pass email from localStorage
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+            email,
+            amount: amountToPay * 100,
+            currency: "INR",
+            bookingId, // Pass the booking ID to verification
+            paymentType: 'full',
+            remainingAmount,
+            totalPrice: totals.totalPrice,
+            originalPaymentOption: paymentOption
           }
-
+          
+          console.log("Verifying payment with data:", verifyData)
+          
           try {
             const verifyResponse = await verifyPayment(verifyData)
-            console.log("Verify response:", verifyResponse)
+            console.log("Verification response:", verifyResponse)
+            
             if (verifyResponse?.status !== 200 || !verifyResponse.data?.success) {
               throw new Error('Payment verification failed')
             }
 
-            // Step 4: On verification success, create the booking with payment details
-            const bookingData = {
-              userId,
-              shopId: center._id,
-              serviceIds: services.map(s => s.id),
-              services: services.map(s => ({
-                id: s.id,
-                name: s.name,
-                price: s.price,
-                duration: s.duration
-              })),
-              bookingDate: date,
-              timeSlot: {
-                startingTime: startDate.toISOString(),
-                endingTime: endDate.toISOString()
-              },
-              totalPrice: totals.totalPrice,
-              totalDuration: totals.totalTime,
-              paymentType: paymentOption,
-              amountToPay,
-              remainingAmount,
-              currency: "INR",
-              serviceType,
-              vehicle,
-              // Add verified payment details
-              verifiedPayment: verifyResponse.data // Include full verified data if needed
-            }
-
-            const bookingResponse = await createBooking(bookingData)
-            console.log("Booking response:", bookingResponse)
-            if (bookingResponse?.status === 200 && bookingResponse.data?.success) {
-              const { bookingId } = bookingResponse.data
-              alert(`🎉 Payment Verified & Booking Successful! Booking ID: ${bookingId}\n\nThank you for choosing us!`)
-              // Reset form or navigate
-              setServices([])
-              setDate("")
-              setTime("")
-              navigate('/bookings') // Assuming route
-            } else {
-              throw new Error('Booking creation failed after verification')
-            }
-          } catch (error) {
-            console.error('Verification or Booking error:', error)
-            alert(`Payment succeeded, but verification/booking failed. Please contact support with Payment ID: ${paymentResponse.razorpay_payment_id}`)
+            // Payment successful and verified
+            alert(`🎉 Payment Verified & Booking Confirmed!\nBooking ID: ${bookingId}\nThank you for choosing us!`)
+            
+            // Reset form
+            setServices([])
+            setDate("")
+            setTime("")
+            navigate('/history')
+          } catch (error: any) {
+            console.error('Verification error:', error)
+            alert(`Payment succeeded but verification failed: ${error.message || 'Unknown error'}\nBooking ID: ${bookingId}\nPlease contact support.`)
+          } finally {
+            setProcessingPayment(false)
           }
-        });
-      } catch (error) {
-        console.error('API Error:', error)
-        alert(`Error: ${error.response?.data?.message || 'Order creation failed'}`)
+        },
+        modal: {
+          ondismiss: () => {
+            console.log('Payment dismissed by user')
+            // Optional: Update booking status to cancelled if user dismisses
+            setProcessingPayment(false)
+          }
+        }
       }
+
+      // Step 5: Open Razorpay checkout
+      const rzp = new window.Razorpay(options)
+      rzp.on('payment.failed', (response: any) => {
+        console.error('Payment failed:', response)
+        alert(`Payment failed for Booking ID: ${bookingId}\nError: ${response.error?.description || 'Unknown error'}`)
+        // Optional: Update booking status to payment_failed
+        setProcessingPayment(false)
+      })
+      
+      rzp.open()
+    } catch (error: any) {
+      console.error('Booking process error:', error)
+      alert(`Error: ${error.message || 'Booking process failed'}`)
+      setProcessingPayment(false)
     }
-  }, [canBook, center, services, date, time, serviceType, totals, userId, navigate, parseTimeToMinutes, razorpayLoading, time, paymentOption, vehicle, email])
+  }, [
+    canBook, center, services, date, time, serviceType, totals, 
+    paymentOption, vehicle, userId, email, userName, userPhone,
+    parseTimeToMinutes, navigate, processingPayment, closeConfirmModal
+  ])
 
-  const openConfirmModal = useCallback(() => {
-    if (canBook && center) {
-      setShowConfirmModal(true)
-    }
-  }, [canBook, center])
-
-  const closeConfirmModal = useCallback(() => {
-    setShowConfirmModal(false)
-  }, [])
-
-  // Early returns after all hooks
+  // Loading state
   if (loading) return <LoadingSpinner />
   if (!center) return <NotFound />
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      {processingPayment && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full mx-4">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+              <p className="text-gray-800 font-medium mb-2">Processing Payment...</p>
+              <p className="text-gray-600 text-sm">Please complete the payment in the Razorpay window</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white border-b shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-3">
           <BackButton onClick={() => navigate(-1)} />
