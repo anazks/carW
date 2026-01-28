@@ -1,3 +1,3 @@
-const BaseURL = "http://localhost:3002/api/"
+const BaseURL = "http://192.168.29.238:3002/api/"
 
 export default BaseURL

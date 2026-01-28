@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Plus, Trash2, Save } from "lucide-react"
 import OwnerNavBar from "../Layout/OwnerNavBar"
-
+import { AddService } from "../../../Api/Service"
 interface Service {
   id: number
   name: string

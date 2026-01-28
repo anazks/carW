@@ -5,7 +5,7 @@ export const createBooking = async (data: any) => {
     console.log('Creating booking with data:', data);
     try {
         const response = await Axios.post(`${API_BASE_URL}/BookNow`, data);
-        console.log('API response for create booking:', response.data);
+        console.log('API response for create booking:', response);
         return response; // { success, message, data }
     } catch (error) {
         console.error('Error creating booking:', error);
@@ -26,6 +26,7 @@ export const createOrder = async (data: any) => {
 
 export const verifyPayment = async (data: any) => {
     try {
+        console.log('Verifying payment with data:', data);
         const response = await Axios.post(`${API_BASE_URL}/verifyPayment`, data);
         console.log('API response for verify payment:', response.data);
         return response; // { success, message, data }
@@ -34,3 +35,14 @@ export const verifyPayment = async (data: any) => {
         throw error;
     }
 };
+
+export const getBookingHistory = async () => {
+    try {
+        const response = await Axios.post(`${API_BASE_URL}/myBookings/`);
+        console.log('API response for booking history:', response.data);
+        return response; // { success, message, data }
+    } catch (error) {
+        console.error('Error fetching booking history:', error);
+        throw error;
+    }
+}

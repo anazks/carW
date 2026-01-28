@@ -10,7 +10,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getProfile } from "../../Api/Auth";
+import { useAuth } from "../../Context/UserContext"; // Added: Import auth context
 
 /* ================= TYPES ================= */
 type UserType = {
@@ -23,11 +23,11 @@ type UserType = {
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState<UserType | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Removed: Local user/loading state—now using context
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout, loading: authLoading } = useAuth(); // Added: Destructure from context
 
   /* ================= SCROLL EFFECT ================= */
   useEffect(() => {
@@ -36,44 +36,16 @@ export default function NavBar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* ================= FETCH USER PROFILE ================= */
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchProfile();
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      const response = await getProfile();
-
-      console.log("Profile response:", response);
-
-      // ✅ FIXED: correct API response key
-      setUser(response.user);
-    } catch (error) {
-      console.error("Profile fetch error:", error);
-      localStorage.removeItem("token");
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   /* ================= LOGOUT ================= */
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
+    logout(); // Updated: Use context logout for full cleanup (token, user, etc.)
     navigate("/login");
   };
 
   /* ================= NAV LINKS ================= */
   const baseNavLinks = [
     { path: "/", label: "Home", icon: Home },
-    { path: "/services", label: "Services", icon: Droplet },
+    // { path: "/services", label: "Services", icon: Droplet },
   ];
 
   const userNavLinks = user
@@ -88,7 +60,7 @@ export default function NavBar() {
   const isActive = (path: string) => location.pathname === path;
 
   /* ================= LOADING STATE ================= */
-  if (loading) {
+  if (authLoading) {
     return <div className="fixed top-0 w-full h-16 bg-white z-50" />;
   }
 
@@ -151,7 +123,7 @@ export default function NavBar() {
               {user ? (
                 <>
                   <span className="text-gray-700 font-medium">
-                    {user.firstName} {user.lastName}
+                    {user.firstName} {user.lastName} {/* Now shows from context */}
                   </span>
 
                   <button
@@ -218,7 +190,7 @@ export default function NavBar() {
             {user ? (
               <>
                 <div className="px-4 py-2 text-sm text-gray-600 border-t">
-                  Welcome, {user.firstName}
+                  Welcome, {user.firstName} {/* Now shows from context */}
                 </div>
 
                 <button
