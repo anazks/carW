@@ -22,6 +22,9 @@ import OwnerTimeSlots from "./Components/owner/TimeSlots/TimeSlot";
 
 /* CONTEXT */
 import AuthProvider from "./Context/UserContext";
+import Register from "./Components/Register/Register";
+import RegisterPage from "./Components/owner/Register/Register";
+import AddShop from "./Components/owner/AddShop/AddShop";
 
 export default function App() {
   return (
@@ -96,14 +99,26 @@ export default function App() {
               </>
             }
           />
+          <Route
+            path="/register"
+            element={ 
+              <>
+                <NavBar />
+                <Register />
+                <Footer />
+              </>
+            }
+          />
 
           {/* ================= OWNER SIDE ================= */}
           {/* NO NAVBAR / FOOTER */}
           <Route path="/owner/login" element={<OwnerLogin />} />
+          <Route path="/owner/register" element={<RegisterPage/>} />
           <Route path="/owner" element={<OwnerDashboard />} />
           <Route path="/owner/bookings" element={<OwnerBookings />} />
           <Route path="/owner/profile" element={<OwnerProfile />} />
           <Route path="/owner/services" element={<OwnerServices />} />
+          <Route path="/owner/addShop" element={<AddShop />} />
           <Route path="/owner/timeslots" element={<OwnerTimeSlots />} />
 
         </Routes>

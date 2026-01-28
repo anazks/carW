@@ -10,7 +10,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const { token, setToken } = useAuth();
+  const [success, setSuccess] = useState<string>("");
+  const { token, login } = useAuth(); // Updated: Use 'login' from optimized context
 
   // 🔒 Disable scroll
   useEffect(() => {
@@ -36,12 +37,30 @@ export default function LoginPage() {
     }
     setLoading(true);
     setError("");
+    setSuccess("");
     try {
       const response = await userLogin({ email, password });
       console.log("Login successful:----------", response);
-      setToken(response.result.token);
+      
+      const { token: newToken, user: loginUser } = response.result; // Destructure for clarity
+      
+      // Use 'login' to set token + user (fixes 'setToken not a function' error)
+      login(newToken, loginUser);
       localStorage.setItem("email", email);
-      navigate("/");
+
+      // Personalized success message using user data
+      let fullName = "User"; // Fallback
+      if (loginUser && loginUser.firstName && loginUser.lastName) {
+        fullName = `${loginUser.firstName} ${loginUser.lastName}`;
+      } else if (loginUser?.name) {
+        fullName = loginUser.name; // Alternative if API uses 'name'
+      }
+      setSuccess(`Welcome, ${fullName}! Logging in...`);
+      
+      // Redirect after showing success message
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
     } catch (err) {
       setError("Login failed. Please check your credentials.");
       console.error("Login error:", err);
@@ -54,6 +73,7 @@ export default function LoginPage() {
     setEmail("");
     setPassword("");
     setError("");
+    setSuccess("");
   };
 
   return (
@@ -95,6 +115,10 @@ export default function LoginPage() {
             {/* ERROR MESSAGE */}
             {error && (
               <div className="text-red-500 text-sm text-center">{error}</div>
+            )}
+            {/* SUCCESS MESSAGE */}
+            {success && (
+              <div className="text-green-600 text-sm text-center">{success}</div>
             )}
             {/* LOGIN BUTTON */}
             <button

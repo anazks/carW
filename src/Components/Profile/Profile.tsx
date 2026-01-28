@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { User, Mail, Phone, Calendar, Settings, LogOut, Edit, Loader2 } from 'lucide-react';
 import { getProfile } from '../../Api/Auth';
-
+import {getProfileShop} from '../../Api/Service';
 interface UserProfile {
   _id: string;
   firstName: string;
