@@ -1,11 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Check, AlertCircle, Plus, Trash2 } from "lucide-react";
 import { addnewShop } from '../../../Api/Service';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../Context/UserContext"; // Assuming shared auth context
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'; // Add: npm install react-leaflet leaflet
 import 'leaflet/dist/leaflet.css'; // Add to your CSS or import in main file
-import NavBar from "../../NavBar/NavBar";
 import OwnerNavBar from "../Layout/OwnerNavBar";
 
 // Type for media item
@@ -111,7 +110,6 @@ export default function AddShop() {
         Timing: timing.trim(),
         website: website.trim(),
         media: media.length > 0 ? media : undefined,
-        ShopOwnerId: user._id, // From auth context
         IsPremium: isPremium,
         ...(isPremium && {
           PremiumStartDate: new Date(premiumStartDate),
@@ -127,7 +125,7 @@ export default function AddShop() {
       if (response.success) { // Or response.status === 201, etc.
         setSuccess("Shop added successfully! Redirecting...");
         setTimeout(() => {
-          navigate("/owner-dashboard"); // Adjust redirect path
+          navigate("/owner"); // Adjust redirect path to /owner
         }, 2000);
       } else {
         throw new Error(response.message || "Failed to add shop.");

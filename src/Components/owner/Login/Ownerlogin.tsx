@@ -32,7 +32,7 @@ export default function OwnerLogin() {
       const response = await shopLogin({ email, password });
       console.log("Owner Login successful:", response); // For debugging
 
-      const { token: newToken, user: loginUser } = response.result; // Assuming similar structure
+      const { token: newToken, user: loginUser } = response; // Updated: removed .result
       if (!newToken) {
         throw new Error("No token received from server.");
       }
@@ -55,7 +55,8 @@ export default function OwnerLogin() {
       }, 2000);
     } catch (err: any) {
       console.error("Owner Login error:", err);
-      setError(err.message || "Login failed. Please check your credentials.");
+      const msg = err.response?.data?.message || err.message || "Login failed. Please check your credentials.";
+      setError(msg);
     } finally {
       setLoading(false);
     }

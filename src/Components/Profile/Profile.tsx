@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { User, Mail, Phone, Calendar, Settings, LogOut, Edit, Loader2 } from 'lucide-react';
 import { getProfile } from '../../Api/Auth';
-import {getProfileShop} from '../../Api/Service';
+// import {getProfileShop} from '../../Api/Service';
 interface UserProfile {
   _id: string;
   firstName: string;
@@ -46,41 +46,35 @@ export default function Profile() {
     fetchUserProfile();
   }, []);
 
-  const fetchUserProfile = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await getProfile();
-      console.log('Profile API response:', response);
-      
-      if (!response.success) {
-        const userProfile = response.data.user;
-        console.log('User Profile Data:', userProfile);
-        // Transform API response to match our interface
-        setUserData({
-          _id: userProfile._id,
-          firstName: userProfile.firstName || '',
-          lastName: userProfile.lastName || '',
-          mobileNo: userProfile.mobileNo || '',
-          city: userProfile.city || '',
-          email: userProfile.email || '',
-          role: userProfile.role || 'user',
-          totalBookings: 0, // You might need to fetch this from another API
-          totalSpent: '₹0', // You might need to fetch this from another API
-          memberSince: userProfile.createdAt || new Date().toISOString().split('T')[0],
-          avatar: defaultUser.avatar // Keep default avatar or implement avatar API
-        });
-      } else {
-        setError('Failed to fetch profile');
-      }
-    } catch (err: any) {
-      console.error('Error fetching profile:', err);
-      setError(err.message || 'An error occurred while fetching profile');
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchUserProfile = async () => {
+  try {
+    setLoading(true);
+
+    const userProfile = await getProfile();
+
+    console.log("PROFILE DATA:", userProfile); // ✅ debug
+
+    setUserData({
+      _id: userProfile._id || userProfile.id || "",
+      firstName: userProfile.firstName || "",
+      lastName: userProfile.lastName || "",
+      mobileNo: userProfile.mobileNo || "",
+      city: userProfile.city || "",
+      email: userProfile.email || "",
+      role: userProfile.role || "user",
+      totalBookings: 0,
+      totalSpent: "₹0",
+      memberSince: userProfile.createdAt,
+      avatar: defaultUser.avatar,
+    });
+
+  } catch (error) {
+    console.error("PROFILE ERROR:", error);
+    setError("Failed to load profile");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleChange = (field: keyof UserProfile, value: string) => {
     setUserData(prev => ({ ...prev, [field]: value }));
@@ -369,7 +363,7 @@ export default function Profile() {
         </div>
 
         {/* Development Note */}
-        {process.env.NODE_ENV === 'development' && (
+        {/* {process.env.NODE_ENV === 'development' && (
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-700">
               <strong>Note:</strong> This profile component now fetches real user data from the API.
@@ -377,7 +371,7 @@ export default function Profile() {
               implement an updateProfile API endpoint.
             </p>
           </div>
-        )}
+        )} */}
 
       </div>
     </div>

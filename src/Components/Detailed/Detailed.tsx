@@ -1,1416 +1,488 @@
 "use client"
 
-import { useState } from "react"
-import { MapPin, Clock, Users } from "lucide-react"
+import { useState, useEffect, useCallback, useMemo } from "react"
+import { MapPin, ChevronLeft, CheckCircle2, Clock, Bike, Car, Truck } from "lucide-react"
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
 import { useParams, useNavigate } from "react-router-dom"
-import "leaflet/dist/leaflet.css"
-
-/* ================= DATA ================= */
-const carWashCenters = [
-  {
-    id: 1,
-    name: "Mycarwash Downtown",
-    location: "123 Main Street, Downtown",
-    hours: "8:00 AM - 8:00 PM",
-    price: "₹150 - ₹500",
-    totalTime: "30-45 min",
-    vehicleTypes: ["Car", "Bike", "Heavy Vehicle"],
-    pickAndDrop: true,
-    washAtHome: true,
-    lat: 40.7128,
-    lng: -74.006,
-    services: [
-      { name: "Express Wash", price: 150, time: 20, vehicleType: ["Car", "Bike", "Heavy Vehicle"] },
-      { name: "Full Detail", price: 500, time: 60, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Interior Clean", price: 200, time: 30, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Wax & Polish", price: 250, time: 40, vehicleType: ["Car"] },
-      { name: "Engine Clean", price: 300, time: 30, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Tire Shine", price: 100, time: 15, vehicleType: ["Car", "Bike", "Heavy Vehicle"] },
-      { name: "Underbody Wash", price: 150, time: 20, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Seat Shampoo", price: 200, time: 25, vehicleType: ["Car"] },
-      { name: "Chain Cleaning", price: 100, time: 15, vehicleType: ["Bike"] },
-      { name: "Bike Polish", price: 150, time: 20, vehicleType: ["Bike"] },
-      { name: "Heavy Wash", price: 600, time: 90, vehicleType: ["Heavy Vehicle"] },
-      { name: "Cargo Area Clean", price: 400, time: 45, vehicleType: ["Heavy Vehicle"] },
-    ],
-    timeSlots: {
-      morning: [
-        { time: "8:00 AM", availableSlots: 3 },
-        { time: "9:00 AM", availableSlots: 5 },
-        { time: "10:00 AM", availableSlots: 2 },
-        { time: "11:00 AM", availableSlots: 4 },
-      ],
-      afternoon: [
-        { time: "12:00 PM", availableSlots: 6 },
-        { time: "1:00 PM", availableSlots: 3 },
-        { time: "2:00 PM", availableSlots: 1 },
-        { time: "3:00 PM", availableSlots: 4 },
-        { time: "4:00 PM", availableSlots: 5 },
-      ],
-    },
-  },
-  {
-    id: 2,
-    name: "Mycarwash Uptown",
-    location: "Uptown Avenue",
-    hours: "7:00 AM - 9:00 PM",
-    price: "₹200 - ₹750",
-    totalTime: "45-60 min",
-    vehicleTypes: ["Car", "Bike", "Heavy Vehicle"],
-    pickAndDrop: true,
-    washAtHome: false,
-    lat: 40.73061,
-    lng: -73.935242,
-    services: [
-      { name: "Express Wash", price: 200, time: 25, vehicleType: ["Car", "Bike", "Heavy Vehicle"] },
-      { name: "Interior Clean", price: 250, time: 35, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Wax", price: 300, time: 40, vehicleType: ["Car"] },
-      { name: "Engine Clean", price: 350, time: 45, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Seat Shampoo", price: 200, time: 30, vehicleType: ["Car"] },
-      { name: "Tire Shine", price: 100, time: 15, vehicleType: ["Car", "Bike", "Heavy Vehicle"] },
-      { name: "Full Detail", price: 600, time: 75, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Underbody Wash", price: 150, time: 20, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Chain Cleaning", price: 120, time: 20, vehicleType: ["Bike"] },
-      { name: "Bike Polish", price: 180, time: 25, vehicleType: ["Bike"] },
-      { name: "Heavy Wash", price: 700, time: 100, vehicleType: ["Heavy Vehicle"] },
-    ],
-    timeSlots: {
-      morning: [
-        { time: "7:00 AM", availableSlots: 4 },
-        { time: "8:00 AM", availableSlots: 6 },
-        { time: "9:00 AM", availableSlots: 3 },
-        { time: "10:00 AM", availableSlots: 5 },
-        { time: "11:00 AM", availableSlots: 2 },
-      ],
-      afternoon: [
-        { time: "12:00 PM", availableSlots: 4 },
-        { time: "1:00 PM", availableSlots: 5 },
-        { time: "2:00 PM", availableSlots: 3 },
-        { time: "3:00 PM", availableSlots: 6 },
-        { time: "4:00 PM", availableSlots: 4 },
-        { time: "5:00 PM", availableSlots: 2 },
-      ],
-    },
-  },
-  {
-    id: 3,
-    name: "Mycarwash Westside",
-    location: "Westside Road",
-    hours: "8:00 AM - 7:00 PM",
-    price: "₹120 - ₹400",
-    totalTime: "30-40 min",
-    vehicleTypes: ["Car", "Bike", "Heavy Vehicle"],
-    pickAndDrop: false,
-    washAtHome: true,
-    lat: 40.74061,
-    lng: -73.955242,
-    services: [
-      { name: "Express Wash", price: 120, time: 20, vehicleType: ["Car", "Bike", "Heavy Vehicle"] },
-      { name: "Interior Clean", price: 150, time: 25, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Wax & Polish", price: 200, time: 30, vehicleType: ["Car"] },
-      { name: "Seat Shampoo", price: 180, time: 25, vehicleType: ["Car"] },
-      { name: "Tire Shine", price: 100, time: 15, vehicleType: ["Car", "Bike", "Heavy Vehicle"] },
-      { name: "Engine Clean", price: 250, time: 30, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Underbody Wash", price: 150, time: 20, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Full Detail", price: 400, time: 50, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Chain Cleaning", price: 80, time: 15, vehicleType: ["Bike"] },
-      { name: "Bike Polish", price: 120, time: 20, vehicleType: ["Bike"] },
-    ],
-    timeSlots: {
-      morning: [
-        { time: "8:00 AM", availableSlots: 2 },
-        { time: "9:00 AM", availableSlots: 3 },
-        { time: "10:00 AM", availableSlots: 4 },
-        { time: "11:00 AM", availableSlots: 2 },
-      ],
-      afternoon: [
-        { time: "12:00 PM", availableSlots: 3 },
-        { time: "1:00 PM", availableSlots: 4 },
-        { time: "2:00 PM", availableSlots: 2 },
-        { time: "3:00 PM", availableSlots: 3 },
-      ],
-    },
-  },
-  {
-    id: 4,
-    name: "Mycarwash NorthWest",
-    location: "NorthWest Street",
-    hours: "8:00 AM - 6:00 PM",
-    price: "₹350 - ₹800",
-    totalTime: "50-60 min",
-    vehicleTypes: ["Car", "Bike", "Heavy Vehicle"],
-    pickAndDrop: true,
-    washAtHome: false,
-    lat: 40.75061,
-    lng: -73.975242,
-    services: [
-      { name: "Express Wash", price: 350, time: 30, vehicleType: ["Car", "Bike", "Heavy Vehicle"] },
-      { name: "Full Detail", price: 800, time: 75, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Wax & Polish", price: 400, time: 40, vehicleType: ["Car"] },
-      { name: "Interior Clean", price: 300, time: 35, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Engine Clean", price: 350, time: 40, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Seat Shampoo", price: 250, time: 30, vehicleType: ["Car"] },
-      { name: "Underbody Wash", price: 300, time: 35, vehicleType: ["Car", "Heavy Vehicle"] },
-      { name: "Tire Shine", price: 150, time: 20, vehicleType: ["Car", "Bike", "Heavy Vehicle"] },
-      { name: "Chain Cleaning", price: 150, time: 25, vehicleType: ["Bike"] },
-      { name: "Bike Polish", price: 200, time: 30, vehicleType: ["Bike"] },
-      { name: "Heavy Wash", price: 750, time: 95, vehicleType: ["Heavy Vehicle"] },
-      { name: "Cargo Area Clean", price: 450, time: 50, vehicleType: ["Heavy Vehicle"] },
-    ],
-    timeSlots: {
-      morning: [
-        { time: "8:00 AM", availableSlots: 5 },
-        { time: "9:00 AM", availableSlots: 6 },
-        { time: "10:00 AM", availableSlots: 4 },
-        { time: "11:00 AM", availableSlots: 3 },
-      ],
-      afternoon: [
-        { time: "12:00 PM", availableSlots: 5 },
-        { time: "1:00 PM", availableSlots: 4 },
-        { time: "2:00 PM", availableSlots: 6 },
-        { time: "3:00 PM", availableSlots: 3 },
-        { time: "4:00 PM", availableSlots: 2 },
-      ],
-    }, 
-  },
-]
-import { useState, useEffect, useMemo, useCallback, useRef } from "react"
-import { MapPin, Clock, Users, Phone, ChevronLeft, Calendar, CheckCircle2, Star, Globe, Award, X } from "lucide-react"
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
-import { useParams, useNavigate } from "react-router-dom"
-import { getShopDetails, getShopServices, getAvailbleSlots } from '../../Api/Shop'
-import { createBooking, createOrder, verifyPayment } from '../../Api/Booking'
+import { getShopDetails, getShopServices, getAvailbleSlots } from "../../Api/Shop"
+import { createBooking } from "../../Api/Booking"
+import L from "leaflet"
 
 import "leaflet/dist/leaflet.css"
+import markerIcon from "leaflet/dist/images/marker-icon.png"
+import markerShadow from "leaflet/dist/images/marker-shadow.png"
 
-// Constants
-const DEFAULT_VEHICLE_TYPES = ["Car", "Bike", "Heavy Vehicle"] as const
-const DEFAULT_TIME_SLOTS = {
-  morning: [
-    { time: "9:00 AM", availableSlots: 5 },
-    { time: "10:00 AM", availableSlots: 4 },
-    { time: "11:00 AM", availableSlots: 3 },
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+})
+
+// ---------------- TYPES ----------------
+const DUMMY_IDS = ["shop-1", "shop-2", "shop-3"];
+
+const DUMMY_SHOPS: Record<string, ShopDetails> = {
+  "shop-1": {
+    _id: "shop-1",
+    ShopName: "Sparkle Shine Auto",
+    ExactLocation: "Downtown, Mumbai",
+    ExactLocationCoord: { type: "Point", coordinates: [72.8777, 19.076] }
+  },
+  "shop-2": {
+    _id: "shop-2",
+    ShopName: "Premium Wash Care",
+    ExactLocation: "Andheri West, Mumbai",
+    ExactLocationCoord: { type: "Point", coordinates: [72.8697, 19.1136] }
+  },
+  "shop-3": {
+    _id: "shop-3",
+    ShopName: "Eco Steam Wash",
+    ExactLocation: "Bandra, Mumbai",
+    ExactLocationCoord: { type: "Point", coordinates: [72.8295, 19.0596] }
+  },
+};
+
+const SERVICE_SETS = {
+  "shop-1": [
+    { _id: "s1", name: "Standard Exterior Wash", price: 399, duration: "30", vehicleType: "Car", description: "Exterior cleaning with soap and wax." },
+    { _id: "s2", name: "Premium Interior Detailing", price: 1499, duration: "60", vehicleType: "Car", description: "Deep cleaning of seats and dashboard." },
+    { _id: "s3", name: "Bike Polish", price: 299, duration: "40", vehicleType: "Bike", description: "Surface polishing and chain cleaning." },
+    { _id: "s4", name: "Heavy Wash", price: 1200, duration: "60", vehicleType: "Heavy Vehicle", description: "Full pressure wash for large vehicles." },
   ],
-  afternoon: [
-    { time: "12:00 PM", availableSlots: 6 },
-    { time: "2:00 PM", availableSlots: 4 },
-    { time: "4:00 PM", availableSlots: 2 },
+  "shop-2": [
+    { _id: "s5", name: "Engine Steam Cleaning", price: 899, duration: "45", vehicleType: "Car", description: "Deep safe engine degreasing." },
+    { _id: "s6", name: "Full Body Polish", price: 1999, duration: "90", vehicleType: "Car", description: "Scratch removal and shine." },
+    { _id: "s7", name: "Bike Foam Wash", price: 199, duration: "25", vehicleType: "Bike", description: "Quick foam wash and dry." },
   ],
-} as const
-const DEFAULT_PICK_DROP = false
-const DEFAULT_WASH_HOME = false
-const SLOT_BOOKING_AMOUNT = 50
+  "shop-3": [
+    { _id: "s8", name: "Anti-Rust Coating", price: 3500, duration: "150", vehicleType: "Car", description: "Chassis protection." },
+    { _id: "s9", name: "Express Foam Wash", price: 499, duration: "25", vehicleType: "Car", description: "Quick pressure wash." },
+    { _id: "s10", name: "Chassis Wash", price: 800, duration: "45", vehicleType: "Heavy Vehicle", description: "Deep cleaning of vehicle undercarriage." },
+  ],
+};
 
-// Types
-type ShopService = { _id: string; name: string; price: number; time: number; vehicleType: typeof DEFAULT_VEHICLE_TYPES }
-type SelectedService = { id: string; name: string; price: number; duration: number }
-type TimeSlot = { time: string; availableSlots: number }
-type TimeSlots = { morning: TimeSlot[]; afternoon: TimeSlot[] }
-type FreeSlot = { from: string; to: string }
-type PaymentOption = 'slot' | 'full'
-type RazorpayResponse = {
-  razorpay_payment_id: string;
-  razorpay_order_id: string;
-  razorpay_signature: string;
-}
+const DUMMY_SLOTS: Slot[] = [
+  { time: "09:00 AM", availableSlots: 2 },
+  { time: "10:30 AM", availableSlots: 1 },
+  { time: "12:00 PM", availableSlots: 0 },
+  { time: "02:00 PM", availableSlots: 3 },
+  { time: "04:30 PM", availableSlots: 1 },
+];
 
-// Declare Razorpay type
-declare global {
-  interface Window {
-    Razorpay: any;
+interface ShopDetails {
+  _id: string
+  ShopName: string
+  ExactLocation: string
+  ProfileImage?: string    // Added
+  ExactLocationCoord: {
+    type: string
+    coordinates: number[]
   }
 }
 
-// Sub-components
-const LoadingSpinner = () => (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-    <div className="text-center">
-      <div className="w-12 h-12 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-      <p className="text-gray-600 font-medium text-sm">Loading...</p>
-    </div>
-  </div>
-)
-
-const NotFound = () => (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-    <div className="text-center">
-      <div className="text-5xl mb-3">🔍</div>
-      <p className="text-lg text-gray-600 font-medium">Shop not found</p>
-    </div>
-  </div>
-)
-
-const BackButton = ({ onClick }: { onClick: () => void }) => (
-  <button 
-    onClick={onClick} 
-    className="flex items-center gap-1.5 text-gray-700 hover:text-[#D4AF37] font-medium transition-colors group text-sm"
-  >
-    <ChevronLeft className="group-hover:-translate-x-0.5 transition-transform" size={16} />
-    Back
-  </button>
-)
-
-const ShopHero = ({ center }: { center: any }) => {
-  const hasMedia = center.media?.length > 0 || center.ProfileImage
-  const primaryImage = center.media?.[0]?.url || center.ProfileImage
-
-  return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-      {hasMedia && (
-        <div className="relative h-48 bg-gray-900">
-          <img 
-            src={primaryImage} 
-            alt={center.ShopName} 
-            className="w-full h-full object-cover opacity-90"
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          />
-          {center.IsPremium && (
-            <div className="absolute top-2 right-2 bg-gradient-to-r from-[#D4AF37] to-[#F4D03F] text-white px-2 py-1 rounded-md shadow-md flex items-center gap-1 font-semibold text-xs">
-              <Award size={14} />
-              Premium
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">{center.ShopName}</h1>
-            <div className="flex items-center gap-0.5 text-yellow-500 mb-2">
-              {Array.from({ length: 5 }, (_, i) => <Star key={i} fill="currentColor" size={14} />)}
-              <span className="text-gray-600 ml-1 text-xs">5.0 (Premium)</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <InfoCard icon={MapPin} title={center.ExactLocation} subtitle={center.City} />
-          <InfoCard icon={Clock} title="Hours" subtitle={center.Timing} />
-          <InfoCard icon={Phone} title="Contact" subtitle={center.Mobile} />
-          {center.website && (
-            <InfoCard 
-              icon={Globe} 
-              title="Website" 
-              subtitle={
-                <a href={center.website} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
-                  Visit Site
-                </a>
-              } 
-            />
-          )}
-        </div>
-      </div>
-    </div>
-  )
+interface ShopService {
+  _id: string
+  name: string
+  price: number
+  duration: string         // Changed to string to match model
+  description: string
+  vehicleType?: string     // Added
 }
 
-const InfoCard = ({ icon: Icon, title, subtitle }: { icon: any; title: string | React.ReactNode; subtitle: string | React.ReactNode }) => (
-  <div className="flex items-start gap-2 p-2 bg-gray-50 rounded-lg">
-    <Icon className="text-[#D4AF37] flex-shrink-0 mt-0.5" size={16} />
-    <div>
-      <p className="font-medium text-gray-900 text-sm">{title}</p>
-      <p className="text-xs text-gray-600">{subtitle}</p>
-    </div>
-  </div>
-)
-
-const Gallery = ({ media }: { media: any[] }) => (
-  media?.length > 1 && (
-    <div className="bg-white rounded-xl shadow-md p-4 border border-gray-100">
-      <h3 className="text-lg font-bold text-gray-900 mb-3">Gallery</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {media.slice(1, 5).map((item, index) => (
-          <div key={item._id || index} className="relative group overflow-hidden rounded-lg">
-            <img 
-              src={item.url} 
-              alt={item.title || 'Gallery image'} 
-              className="w-full h-20 object-cover group-hover:scale-105 transition-transform duration-200"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1">
-              <p className="text-white text-xs font-medium">{item.title || 'View'}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-)
-
-const ShopMap = ({ center }: { center: any }) => {
-  const lat = center.ExactLocationCoord?.coordinates?.[1] || 0
-  const lng = center.ExactLocationCoord?.coordinates?.[0] || 0
-
-  if (!center.ExactLocationCoord || (lat === 0 && lng === 0)) return null
-
-  return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-      <div className="p-3 border-b">
-        <h3 className="text-lg font-bold text-gray-900">Location</h3>
-      </div>
-      <div className="h-64 relative z-0">
-        <MapContainer center={[lat, lng]} zoom={15} className="h-full w-full">
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <Marker position={[lat, lng]}>
-            <Popup>{center.ShopName}</Popup>
-          </Marker>
-        </MapContainer>
-      </div>
-    </div>
-  )
+interface SelectedService extends ShopService {
+  quantity: number
 }
 
-const VehicleSelector = ({ vehicle, onChange }: { vehicle: string; onChange: (v: string) => void }) => (
-  <div className="bg-white rounded-xl shadow-md p-4 border border-gray-100">
-    <label className="block text-base font-bold text-gray-900 mb-2">Vehicle</label>
-    <div className="grid grid-cols-2 gap-2">
-      {DEFAULT_VEHICLE_TYPES.map((v) => (
-        <button
-          key={v}
-          onClick={() => onChange(v)}
-          className={`p-3 rounded-lg border-2 font-medium transition-all text-sm ${
-            vehicle === v
-              ? "border-[#D4AF37] bg-gradient-to-br from-[#FFF8DC] to-white text-[#D4AF37] shadow-sm"
-              : "border-gray-200 hover:border-gray-300 text-gray-700"
-          }`}
-        >
-          {v}
-        </button>
-      ))}
-    </div>
-  </div>
-)
-
-const ServicesList = ({ services: availableServices, selectedServices, onToggle, vehicle }: { 
-  services: ShopService[]; 
-  selectedServices: SelectedService[]; 
-  onToggle: (service: SelectedService) => void; 
-  vehicle: string 
-}) => {
-  const filtered = useMemo(() => 
-    availableServices.filter((s) => s.vehicleType.includes(vehicle as any)), 
-  [availableServices, vehicle])
-
-  if (filtered.length === 0) {
-    return (
-      <div className="bg-white rounded-xl shadow-md p-4 border border-gray-100">
-        <h2 className="text-base font-bold text-gray-900 mb-3">Services</h2>
-        <div className="text-center py-4 text-gray-500">
-          <div className="text-2xl mb-1">🚗</div>
-          <p className="text-sm">No services for {vehicle}</p>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="bg-white rounded-xl shadow-md p-4 border border-gray-100">
-      <h2 className="text-base font-bold text-gray-900 mb-3">Services</h2>
-      <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-        {filtered.map((s) => {
-          const selectedSvc = selectedServices.find(ss => ss.id === s._id)
-          return (
-            <label
-              key={s._id}
-              className={`block border-2 rounded-lg cursor-pointer transition-all p-3 ${
-                !!selectedSvc
-                  ? "border-[#D4AF37] bg-gradient-to-br from-[#FFF8DC] to-white shadow-sm"
-                  : "border-gray-200 hover:border-gray-300 hover:shadow"
-              }`}
-            >
-              <div className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  checked={!!selectedSvc}
-                  onChange={() => onToggle({ id: s._id, name: s.name, price: s.price, duration: s.time })}
-                  className="w-4 h-4 accent-[#D4AF37] cursor-pointer mt-0.5"
-                />
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900 text-sm mb-0.5">{s.name}</div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="text-[#D4AF37] font-bold">₹{s.price}</span>
-                    <span className="text-gray-500">•</span>
-                    <span className="text-gray-600 flex items-center gap-0.5">
-                      <Clock size={12} />
-                      {s.time} min
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </label>
-          )
-        })}
-      </div>
-    </div>
-  )
+interface Slot {
+  time: string
+  availableSlots: number
 }
 
-const DateTimePicker = ({ 
-  date, 
-  time, 
-  onDateChange, 
-  onTimeChange, 
-  timeSlots, 
-  loadingSlots, 
-  servicesSelected 
-}: { 
-  date: string; 
-  time: string; 
-  onDateChange: (d: string) => void; 
-  onTimeChange: (t: string) => void; 
-  timeSlots: TimeSlots;
-  loadingSlots: boolean;
-  servicesSelected: boolean 
-}) => (
-  <div className="bg-white rounded-xl shadow-md p-4 border border-gray-100">
-    <h2 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-1.5">
-      <Calendar size={16} className="text-[#D4AF37]" />
-      Date & Time
-    </h2>
-    <input
-      type="date"
-      value={date}
-      onChange={(e) => onDateChange(e.target.value)}
-      className="w-full border-2 border-gray-200 p-2 rounded-lg mb-3 focus:border-[#D4AF37] focus:outline-none font-medium text-sm"
-    />
-    {loadingSlots ? (
-      <div className="text-center py-4 text-gray-500">
-        <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-        <p className="text-sm">Loading slots...</p>
-      </div>
-    ) : date && servicesSelected ? (
-      <div className="space-y-3">
-        {(['morning', 'afternoon'] as const).map((period) => {
-          const periodSlots = timeSlots[period]
-          if (!periodSlots || periodSlots.length === 0) {
-            return (
-              <div key={period}>
-                <h3 className="font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">
-                  {period.charAt(0).toUpperCase() + period.slice(1)}
-                </h3>
-                <p className="text-gray-500 text-xs py-1">No slots available</p>
-              </div>
-            )
-          }
-          return (
-            <div key={period}>
-              <h3 className="font-semibold text-gray-700 mb-1.5 text-xs uppercase tracking-wide">
-                {period.charAt(0).toUpperCase() + period.slice(1)}
-              </h3>
-              <div className="flex gap-1.5 flex-wrap">
-                {periodSlots.map((slot) => (
-                  <button
-                    key={slot.time}
-                    onClick={() => onTimeChange(slot.time)}
-                    disabled={slot.availableSlots === 0}
-                    className={`px-3 py-2 border-2 rounded-lg flex flex-col items-center min-w-[75px] transition-all text-sm ${
-                      time === slot.time
-                        ? "bg-gradient-to-br from-[#D4AF37] to-[#b69530] text-white border-[#D4AF37] shadow-sm scale-105"
-                        : slot.availableSlots === 0
-                          ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-                          : "border-gray-200 hover:border-[#D4AF37] hover:shadow"
-                    }`}
-                  >
-                    <span className="font-bold text-xs">{slot.time}</span>
-                    <span className={`text-xs flex items-center gap-0.5 mt-0.5 ${
-                      time === slot.time ? "text-white/90" : slot.availableSlots === 0 ? "text-gray-400" : "text-green-600"
-                    }`}>
-                      <Users size={10} />
-                      {slot.availableSlots}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    ) : (
-      <div className="text-center py-4 text-gray-500">
-        <p className="text-sm">Select a date and at least one service to view available time slots</p>
-      </div>
-    )}
-  </div>
-)
-
-const ServiceTypeSelector = ({ type, pickAndDrop, washAtHome, onChange }: { 
-  type: "center" | "pickDrop" | "home"; 
-  pickAndDrop: boolean; 
-  washAtHome: boolean; 
-  onChange: (t: "center" | "pickDrop" | "home") => void 
-}) => (
-  <div className="bg-white rounded-xl shadow-md p-4 border border-gray-100 space-y-3">
-    <h2 className="text-base font-bold text-gray-900">Service Type</h2>
-    <div className="space-y-2">
-      <TypeButton 
-        label="At Center" 
-        sub="Visit facility" 
-        selected={type === "center"} 
-        onClick={() => onChange("center")} 
-      />
-      {pickAndDrop && (
-        <TypeButton 
-          label="Pick & Drop" 
-          sub="We transport" 
-          selected={type === "pickDrop"} 
-          onClick={() => onChange("pickDrop")} 
-        />
-      )}
-      {washAtHome && (
-        <TypeButton 
-          label="At Home" 
-          sub="We visit you" 
-          selected={type === "home"} 
-          onClick={() => onChange("home")} 
-        />
-      )}
-    </div>
-  </div>
-)
-
-const TypeButton = ({ label, sub, selected, onClick }: { label: string; sub: string; selected: boolean; onClick: () => void }) => (
-  <button
-    onClick={onClick}
-    className={`p-3 border-2 rounded-lg font-medium transition-all text-left w-full ${
-      selected
-        ? "border-[#D4AF37] bg-gradient-to-br from-[#FFF8DC] to-white shadow-sm"
-        : "border-gray-200 hover:border-gray-300"
-    }`}
-  >
-    <div className="flex items-center gap-2">
-      {selected && <CheckCircle2 className="text-[#D4AF37]" size={16} />}
-      <div>
-        <div className="font-semibold text-sm">{label}</div>
-        <div className="text-xs text-gray-600">{sub}</div>
-      </div>
-    </div>
-  </button>
-)
-
-const BookingButton = ({ canBook, onBook, center, vehicle, services, date, time, serviceType, totalPrice, totalTime }: { 
-  canBook: boolean; 
-  onBook: () => void; 
-  center: any; 
-  vehicle: string; 
-  services: SelectedService[]; 
-  date: string; 
-  time: string; 
-  serviceType: string; 
-  totalPrice: number; 
-  totalTime: number 
-}) => (
-  <div className="bg-white rounded-xl shadow-md p-4 border border-gray-100">
-    <button
-      onClick={onBook}
-      disabled={!canBook}
-      className={`w-full py-3 rounded-lg font-bold text-base transition-all ${
-        canBook
-          ? "bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white shadow-sm hover:shadow-md hover:scale-[1.01]"
-          : "bg-gray-200 text-gray-400 cursor-not-allowed"
-      }`}
-    >
-      {canBook ? "Confirm Booking" : "Select Services & Time"}
-    </button>
-    {!canBook && (
-      <p className="text-center text-xs text-gray-500 mt-2">Select service, date, time</p>
-    )}
-  </div>
-)
-
-// Confirmation Modal
-const ConfirmationModal = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  center, 
-  vehicle, 
-  selectedServices, 
-  date, 
-  time, 
-  serviceType, 
-  totalPrice, 
-  totalTime,
-  paymentOption,
-  onPaymentOptionChange
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  onConfirm: () => void; 
-  center: any; 
-  vehicle: string; 
-  selectedServices: SelectedService[]; 
-  date: string; 
-  time: string; 
-  serviceType: string; 
-  totalPrice: number; 
-  totalTime: number;
-  paymentOption: PaymentOption;
-  onPaymentOptionChange: (option: PaymentOption) => void;
-}) => {
-  if (!isOpen) return null
-
-  const slotAmount = SLOT_BOOKING_AMOUNT
-  const selectedAmount = paymentOption === 'slot' ? slotAmount : totalPrice
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Confirm Booking</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X size={20} />
-          </button>
-        </div>
-        <div className="space-y-4 text-sm">
-          <div>
-            <p className="font-semibold text-gray-900">Shop:</p>
-            <p className="text-gray-600">{center.ShopName}</p>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-900">Vehicle:</p>
-            <p className="text-gray-600">{vehicle}</p>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-900">Services:</p>
-            <p className="text-gray-600">{selectedServices.map(s => s.name).join(', ')}</p>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-900">Date & Time:</p>
-            <p className="text-gray-600">{date} at {time}</p>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-900">Service Type:</p>
-            <p className="text-gray-600 capitalize">{serviceType.replace(/([A-Z])/g, ' $1')}</p>
-          </div>
-          <div className="border-t pt-4">
-            <div className="flex justify-between text-lg font-bold">
-              <span>Total: ₹{totalPrice}</span>
-              <span>{totalTime} min</span>
-            </div>
-          </div>
-          <div className="border-t pt-4">
-            <p className="font-semibold text-gray-900 mb-2">Payment Option:</p>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  value="slot"
-                  checked={paymentOption === 'slot'}
-                  onChange={() => onPaymentOptionChange('slot')}
-                  className="w-4 h-4 accent-[#D4AF37]"
-                />
-                <div>
-                  <div className="font-medium">Slot Booking</div>
-                  <div className="text-xs text-gray-600">Secure your slot for ₹{slotAmount} (pay remaining later)</div>
-                </div>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  value="full"
-                  checked={paymentOption === 'full'}
-                  onChange={() => onPaymentOptionChange('full')}
-                  className="w-4 h-4 accent-[#D4AF37]"
-                />
-                <div>
-                  <div className="font-medium">Full Payment</div>
-                  <div className="text-xs text-gray-600">Pay total amount upfront</div>
-                </div>
-              </label>
-            </div>
-            <div className="flex justify-between text-lg font-bold mt-3 pt-2 border-t">
-              <span>Amount to Pay: ₹{selectedAmount}</span>
-              <span>Remaining: ₹{paymentOption === 'slot' ? totalPrice - slotAmount : 0}</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex gap-3 mt-6">
-          <button 
-            onClick={onClose} 
-            className="flex-1 py-2 px-4 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button 
-            onClick={onConfirm} 
-            className="flex-1 py-2 px-4 bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white rounded-lg font-bold hover:shadow-md"
-          >
-            Confirm & Pay ₹{selectedAmount}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ================= COMPONENT ================= */
+// ---------------- COMPONENT ----------------
 export default function Detailed() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const center = carWashCenters.find((c) => c.id === Number(id))
 
-  const [vehicle, setVehicle] = useState(center?.vehicleTypes[0] || "")
-  const [services, setServices] = useState<string[]>([])
+  const [shop, setShop] = useState<ShopDetails | null>(null)
+  const [services, setServices] = useState<ShopService[]>([])
+  const [selectedServices, setSelectedServices] = useState<SelectedService[]>([])
+
+  const [vehicleType, setVehicleType] = useState<'Bike' | 'Car' | 'Heavy Vehicle'>('Car')
   const [date, setDate] = useState("")
-  const [time, setTime] = useState("")
-  const [serviceType, setServiceType] = useState<"center" | "pickDrop" | "home">("center")
+  const [slots, setSlots] = useState<Slot[]>([])
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
 
-  if (!center) return null
-  const [timeSlots, setTimeSlots] = useState<TimeSlots>(DEFAULT_TIME_SLOTS)
-  const [paymentOption, setPaymentOption] = useState<PaymentOption>('slot')
-  const [processingPayment, setProcessingPayment] = useState(false)
-  const razorpayLoaded = useRef(false)
-  
-  // Assume userId from auth context/localStorage
-  const userId = useMemo(() => localStorage.getItem('userId') || 'temp-user-id', [])
-  const email = useMemo(() => localStorage.getItem('email') || 'customer@example.com', [])
-  const userName = useMemo(() => localStorage.getItem('name') || 'Customer', [])
-  const userPhone = useMemo(() => localStorage.getItem('phone') || '9999999999', [])
+  const [loadingSlots, setLoadingSlots] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
-  // Derived values
-  const pickAndDrop = useMemo(() => center?.pickAndDrop || DEFAULT_PICK_DROP, [center])
-  const washAtHome = useMemo(() => center?.washAtHome || DEFAULT_WASH_HOME, [center])
-  const canBook = useMemo(() => services.length > 0 && date && time, [services, date, time])
-  const servicesSelected = useMemo(() => services.length > 0, [services])
-
-  // Load Razorpay script
+  // ---------------- FETCH SHOP + SERVICES ----------------
   useEffect(() => {
-    if (razorpayLoaded.current) return
+    if (!id) return
 
-    const script = document.createElement('script')
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-    script.async = true
-    script.onload = () => {
-      console.log('Razorpay script loaded successfully')
-      razorpayLoaded.current = true
-    }
-    script.onerror = () => {
-      console.error('Failed to load Razorpay script')
-    }
-    document.body.appendChild(script)
+    const fetchData = async () => {
+      try {
+        const shopRes = await getShopDetails(id)
+        const serviceRes = await getShopServices(id)
 
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script)
-      }
-    }
-  }, [])
-
-
-  // Filter services based on selected vehicle type
-  const filteredServices = center.services.filter((service) => service.vehicleType.includes(vehicle))
-
-
-  const toggleService = (name: string) => {
-    setServices((prev) => (prev.includes(name) ? prev.filter((s) => s !== name) : [...prev, name]))
-  }
-
-  // Reset services when vehicle type changes
-  const handleVehicleChange = (newVehicle: string) => {
-
-    const parseTime = (timeStr: string): number => {
-      const [hours, minutes] = timeStr.split(':').map(Number)
-      return hours * 60 + minutes
-    }
-
-    const formatTime = (minutes: number): string => {
-      let hours = Math.floor(minutes / 60)
-      const mins = (minutes % 60).toString().padStart(2, '0')
-      const period = hours >= 12 ? 'PM' : 'AM'
-      hours = hours % 12 || 12
-      return `${hours}:${mins} ${period}`
-    }
-
-    interface TempSlot extends TimeSlot { minutes: number }
-    const morning: TempSlot[] = []
-    const afternoon: TempSlot[] = []
-
-    schedule.freeSlots.forEach((freeSlot: FreeSlot) => {
-      let currentMin = parseTime(freeSlot.from)
-      const endMin = parseTime(freeSlot.to)
-
-      while (currentMin + 30 <= endMin) {
-        const slotTime = formatTime(currentMin)
-        const availableSlots = 4
-        const slot: TempSlot = { time: slotTime, availableSlots, minutes: currentMin }
-
-        if (currentMin < 12 * 60) {
-          morning.push(slot)
-        } else {
-          afternoon.push(slot)
+        if (shopRes.success) {
+          setShop(shopRes.data)
+        } else if (id && DUMMY_IDS.includes(id)) {
+          setShop(DUMMY_SHOPS[id])
         }
 
-        currentMin += 30
+        if (serviceRes.success || Array.isArray(serviceRes)) {
+          setServices(serviceRes.data || serviceRes)
+        } else if (id && DUMMY_IDS.includes(id)) {
+          setServices(SERVICE_SETS[id as keyof typeof SERVICE_SETS] || SERVICE_SETS["shop-1"])
+        }
+      } catch (err) {
+        console.error("Failed to fetch shop data", err)
+        if (id && DUMMY_IDS.includes(id)) {
+          setShop(DUMMY_SHOPS[id])
+          setServices(SERVICE_SETS[id as keyof typeof SERVICE_SETS] || SERVICE_SETS["shop-1"])
+        }
       }
-    })
-
-    const sortedMorning = morning.sort((a, b) => a.minutes - b.minutes).map(({ time, availableSlots }) => ({ time, availableSlots }))
-    const sortedAfternoon = afternoon.sort((a, b) => a.minutes - b.minutes).map(({ time, availableSlots }) => ({ time, availableSlots }))
-
-    return { morning: sortedMorning, afternoon: sortedAfternoon }
-  }, [])
-
-  // Fetch shop data
-  const fetchData = useCallback(async () => {
-    if (!id) return
-    try {
-      setLoading(true)
-      const [detailsRes, servicesRes] = await Promise.all([
-        getShopDetails(id).catch(err => { console.error("Shop details error:", err); return null }),
-        getShopServices(id).catch(err => { console.error("Shop services error:", err); return null })
-      ])
-      if (detailsRes?.data) setCenter(detailsRes.data[0])
-      if (servicesRes?.data) setShopServicesRaw(servicesRes.data)
-    } catch (err) {
-      console.error("Fetch error:", err)
-    } finally {
-      setLoading(false)
     }
+
+    fetchData()
   }, [id])
 
-  // Fetch available slots
-  const fetchAvailableSlots = useCallback(async (shopId: string, bookingDate: string) => {
-    if (!shopId || !bookingDate) return
+  // ---------------- FETCH SLOTS ----------------
+  const fetchSlots = useCallback(async () => {
+    if (!id || !date) return
+
     try {
       setLoadingSlots(true)
-      const response = await getAvailbleSlots({ shopId, bookingDate })
-      if (response?.data?.success && response.data.availableSlots?.success === true) {
-        const schedule = response.data.availableSlots.schedule
-        if (schedule?.freeSlots?.length > 0) {
-          const generatedSlots = generateTimeSlots(schedule)
-          setTimeSlots(generatedSlots)
-          return
-        }
+      setSelectedSlot(null) // reset selection on date change
+
+      const response = await getAvailbleSlots(id, date)
+      // response is already response.data from the axios call
+      // Backend returns: { success: true, availableSlots: ["09:00 AM - 10:00 AM", ...] }
+      const rawSlots = response?.availableSlots || response?.data?.availableSlots
+
+      if (rawSlots && rawSlots.length > 0) {
+        // Normalize: backend may return strings or objects
+        const normalized: Slot[] = rawSlots.map((s: any) => {
+          if (typeof s === 'string') {
+            return { time: s, availableSlots: 3 } // default capacity since backend doesn't return it
+          }
+          return s as Slot
+        })
+        setSlots(normalized)
+      } else if (id && DUMMY_IDS.includes(id)) {
+        setSlots(DUMMY_SLOTS)
+      } else {
+        setSlots([])
       }
-      setTimeSlots(DEFAULT_TIME_SLOTS)
-    } catch (error) {
-      console.error("Error fetching available slots:", error)
-      setTimeSlots(DEFAULT_TIME_SLOTS)
+    } catch (err) {
+      console.error("Failed to fetch slots", err)
+      if (id && DUMMY_IDS.includes(id)) {
+        setSlots(DUMMY_SLOTS)
+      } else {
+        setSlots([])
+      }
     } finally {
       setLoadingSlots(false)
     }
-  }, [generateTimeSlots])
+  }, [id, date])
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    fetchSlots()
+  }, [fetchSlots])
 
-  // Fetch slots when date or services change
-  useEffect(() => {
-    if (center?._id && date && services.length > 0) {
-      fetchAvailableSlots(center._id, date)
-    } else {
-      setTimeSlots(DEFAULT_TIME_SLOTS)
+  // ---------------- ACTIONS ----------------
+  const toggleService = (service: ShopService) => {
+    setSelectedServices(prev => {
+      const exists = prev.find(s => s._id === service._id);
+      if (exists) {
+        return prev.filter(s => s._id !== service._id);
+      } else {
+        return [...prev, { ...service, quantity: 1 }];
+      }
+    });
+  };
+
+  // ---------------- TOTALS ----------------
+  const totalPrice = useMemo(
+    () => selectedServices.reduce((sum, s) => sum + s.price * s.quantity, 0),
+    [selectedServices]
+  )
+
+  const totalDuration = useMemo(
+    () => selectedServices.reduce((sum, s) => sum + (parseInt(s.duration) || 0) * s.quantity, 0),
+    [selectedServices]
+  )
+
+  // ---------------- BOOKING ----------------
+  const handleBooking = async () => {
+    if (!id) return;
+    
+    if (selectedServices.length === 0) {
+      alert("Please select at least one service.");
+      return;
     }
-  }, [center, date, services.length, fetchAvailableSlots])
-
-  // Process shop services
-  const shopServices = useMemo((): ShopService[] => 
-    shopServicesRaw.map(s => ({
-      _id: s._id,
-      name: s.ServiceName,
-      price: parseInt(s.Rate) || 0,
-      time: 30,
-      vehicleType: DEFAULT_VEHICLE_TYPES
-    })), 
-  [shopServicesRaw])
-
-  // Calculate totals
-  const totals = useMemo(() => {
-    const totalPrice = services.reduce((sum, s) => sum + s.price, 0)
-    const totalTime = services.reduce((sum, s) => sum + s.duration, 0)
-    return { totalPrice, totalTime }
-  }, [services])
-
-  // Reset form when center changes
-  useEffect(() => {
-    if (center) {
-      setVehicle(DEFAULT_VEHICLE_TYPES[0])
-      setServices([])
-      setDate("")
-      setTime("")
-      setServiceType("center")
-      setTimeSlots(DEFAULT_TIME_SLOTS)
-      setPaymentOption('slot')
+    if (!date) {
+      alert("Please select a booking date.");
+      return;
     }
-  }, [center])
-
-  // Toggle service selection
-  const toggleService = useCallback((service: SelectedService) => {
-    setServices((prev) => 
-      prev.some((s) => s.id === service.id) 
-        ? prev.filter((s) => s.id !== service.id)
-        : [...prev, service]
-    )
-  }, [])
-
-  // Change vehicle type
-  const handleVehicleChange = useCallback((newVehicle: string) => {
->>>>>>> origin/master
-    setVehicle(newVehicle)
-    setServices([]) // Clear selected services when vehicle type changes
-  }
-
-<<<<<<< HEAD
-  const totalPrice = services.reduce((sum, s) => {
-    const svc = center.services.find((x) => x.name === s)
-    return sum + (svc?.price || 0)
-  }, 0)
-
-  const totalTime = services.reduce((sum, s) => {
-    const svc = center.services.find((x) => x.name === s)
-    return sum + (svc?.time || 0)
-  }, 0)
-
-  return (
-    <div className="min-h-screen bg-gray-50 pt-5 px-4 lg:px-8">
-      <button onClick={() => navigate(-1)} className="mb-4 text-[#D4AF37] font-medium">
-        ← Back to locations
-      </button>
-=======
-  // Filter services by vehicle type
-  const filteredServices = useMemo(() => 
-    shopServices.filter((service) => service.vehicleType.includes(vehicle)),
-  [shopServices, vehicle])
-
-  // Parse time to minutes
-  const parseTimeToMinutes = useCallback((timeStr: string): number => {
-    const [timePart, period] = timeStr.split(' ')
-    let [hours, minutes] = timePart.split(':').map(Number)
-    if (period === 'PM' && hours !== 12) hours += 12
-    if (period === 'AM' && hours === 12) hours = 0
-    return hours * 60 + minutes
-  }, [])
-
-  // Close confirmation modal
-  const closeConfirmModal = useCallback(() => {
-    setShowConfirmModal(false)
-  }, [])
-
-  // Open confirmation modal
-  const openConfirmModal = useCallback(() => {
-    if (canBook && center) {
-      setShowConfirmModal(true)
+    if (!selectedSlot) {
+      alert("Please select a time slot.");
+      return;
     }
-  }, [canBook, center])
-
-  // Main booking handler - NEW FLOW: Create booking first
-  const handleBook = useCallback(async () => {
-    if (!canBook || !center || services.length === 0 || processingPayment) {
-      return
-    }
-
-    // Check if Razorpay is loaded
-    if (!razorpayLoaded.current) {
-      alert('Payment system is still loading. Please try again in a moment.')
-      return
-    }
-
-    if (!window.Razorpay) {
-      alert('Payment system is not available. Please refresh the page and try again.')
-      return
-    }
-
-    setProcessingPayment(true)
-    closeConfirmModal()
 
     try {
-      // Calculate start and end times
-      const startMinutes = parseTimeToMinutes(time)
-      const startDate = new Date(date)
-      startDate.setHours(Math.floor(startMinutes / 60), startMinutes % 60, 0, 0)
-      const endDate = new Date(startDate)
-      endDate.setMinutes(endDate.getMinutes() + totals.totalTime)
+      setLoading(true)
 
-      // Calculate payment amounts
-      const amountToPay = paymentOption === 'slot' ? SLOT_BOOKING_AMOUNT : totals.totalPrice
-      const remainingAmount = paymentOption === 'slot' ? totals.totalPrice - SLOT_BOOKING_AMOUNT : 0
-      
-      // Step 1: First create the booking with pending status
-      const bookingData = {
-        userId,
-        shopId: center._id,
-        serviceIds: services.map(s => s.id),
-        services: services.map(s => ({
-          id: s.id,
-          name: s.name,
-          price: s.price,
-          duration: s.duration
-        })),
-        bookingDate: date,
-        timeSlot: {
-          startingTime: startDate.toISOString(),
-          endingTime: endDate.toISOString()
-        },
-        totalPrice: totals.totalPrice,
-        totalDuration: totals.totalTime,
-        paymentType: 'full', // Use 'full' for now, backend can handle partial later
-        amountToPay,
-        remainingAmount,
-        currency: "INR",
-        serviceType,
-        vehicle,
-        status: 'pending', // Initial status
-        originalPaymentOption: paymentOption // Keep original for reference
-      }
-
-      console.log("Creating booking first with data:", bookingData)
-      
-      // Create booking and keep the booking ID
-      const bookingResponse = await createBooking(bookingData)
-      console.log("Booking creation response:", bookingResponse)
-     if (bookingResponse?.status !== 200 || !bookingResponse.data?.success) {
-        throw new Error('Failed to create booking. Please try again.')
-      }
-
-      const bookingId = bookingResponse.data.BookingStatus._id;
-      console.log("Booking created with ID:", bookingId)
-
-      // Step 2: Create Razorpay order
-      const orderData = {
-        amount: amountToPay * 100, // In paise
-        currency: "INR",
-        receipt: `booking-${bookingId}`,
-        notes: {
-          bookingId, // Include booking ID in notes
-          userId,
-          shopId: center._id,
-          vehicle,
-          services: services.map(s => ({ id: s.id, name: s.name })),
-          bookingDate: date,
-          timeSlot: { startingTime: startDate.toISOString(), endingTime: endDate.toISOString() },
-          serviceType,
-          paymentType: 'full',
-          remainingAmount,
-          totalPrice: totals.totalPrice,
-          totalTime: totals.totalTime,
-          originalPaymentOption: paymentOption
+      const parseTime = (timeStr: string) => {
+        if (!timeStr) return "";
+        try {
+          return new Date(`${date} ${timeStr}`).toISOString();
+        } catch (e) {
+          return `${date} ${timeStr}`;
         }
+      };
+
+const bookingData = {
+  shopId: id,
+  shopName: shop?.ShopName || "Car Wash Shop", // ✅ was "barberName", must be "shopName"
+  bookingDate: date,
+  startTime: selectedSlot.split(' - ')[0]?.trim() || selectedSlot, // ✅ plain string, no ISO
+  endTime: selectedSlot.split(' - ')[1]?.trim() || selectedSlot,   // ✅ plain string, no ISO
+  services: selectedServices.map(s => ({
+    name: s.name,
+    price: s.price,
+    duration: parseInt(s.duration) || 0, // ✅ number, not string
+  })),
+  totalPrice: totalPrice,
+  vehicleType,
+};
+
+      const bookingRes = await createBooking(bookingData)
+
+      if (bookingRes.data?.success) {
+        setShowConfirm(true)
+      } else {
+        throw new Error("Booking failed on server");
       }
-
-      console.log("Creating Razorpay order with data:", orderData)
-      const orderResponse = await createOrder(orderData)
-      
-      if (!orderResponse?.data?.id) {
-        // If order creation fails, we might want to update booking status to failed
-        throw new Error('Failed to create payment order')
-      }
-
-      const razorpayOrderId = orderResponse.data.id
-      console.log("Created Razorpay order:", razorpayOrderId)
-
-      // Step 3: Initialize Razorpay payment
-      const options = {
-        key: "rzp_test_fccR1aGiSJLS1e",
-        amount: amountToPay * 100,
-        currency: "INR",
-        name: center.ShopName,
-        description: `Booking #${bookingId} - ${vehicle} services`,
-        order_id: razorpayOrderId,
-        prefill: {
-          name: userName,
-          email,
-          contact: userPhone,
-        },
-        theme: {
-          color: "#D4AF37",
-        },
-        handler: async (response: RazorpayResponse) => {
-          console.log("Payment successful, verifying...", response)
-          
-          // Step 4: Verify payment with booking ID
-          const verifyData = {
-            razorpayOrderId: response.razorpay_order_id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-            email,
-            amount: amountToPay * 100,
-            currency: "INR",
-            bookingId, // Pass the booking ID to verification
-            paymentType: 'full',
-            remainingAmount,
-            totalPrice: totals.totalPrice,
-            originalPaymentOption: paymentOption
-          }
-          
-          console.log("Verifying payment with data:", verifyData)
-          
-          try {
-            const verifyResponse = await verifyPayment(verifyData)
-            console.log("Verification response:", verifyResponse)
-            
-            if (verifyResponse?.status !== 200 || !verifyResponse.data?.success) {
-              throw new Error('Payment verification failed')
-            }
-
-            // Payment successful and verified
-            alert(`🎉 Payment Verified & Booking Confirmed!\nBooking ID: ${bookingId}\nThank you for choosing us!`)
-            
-            // Reset form
-            setServices([])
-            setDate("")
-            setTime("")
-            navigate('/history')
-          } catch (error: any) {
-            console.error('Verification error:', error)
-            alert(`Payment succeeded but verification failed: ${error.message || 'Unknown error'}\nBooking ID: ${bookingId}\nPlease contact support.`)
-          } finally {
-            setProcessingPayment(false)
-          }
-        },
-        modal: {
-          ondismiss: () => {
-            console.log('Payment dismissed by user')
-            // Optional: Update booking status to cancelled if user dismisses
-            setProcessingPayment(false)
-          }
-        }
-      }
-
-      // Step 5: Open Razorpay checkout
-      const rzp = new window.Razorpay(options)
-      rzp.on('payment.failed', (response: any) => {
-        console.error('Payment failed:', response)
-        alert(`Payment failed for Booking ID: ${bookingId}\nError: ${response.error?.description || 'Unknown error'}`)
-        // Optional: Update booking status to payment_failed
-        setProcessingPayment(false)
-      })
-      
-      rzp.open()
-    } catch (error: any) {
-      console.error('Booking process error:', error)
-      alert(`Error: ${error.message || 'Booking process failed'}`)
-      setProcessingPayment(false)
+    } catch (err: any) {
+      console.error("Booking failed", err)
+      const errorMsg = err.response?.data?.message || err.message || "Unknown error";
+      alert(`Booking failed: ${errorMsg}`);
+    } finally {
+      setLoading(false)
     }
-  }, [
-    canBook, center, services, date, time, serviceType, totals, 
-    paymentOption, vehicle, userId, email, userName, userPhone,
-    parseTimeToMinutes, navigate, processingPayment, closeConfirmModal
-  ])
+  }
 
-  // Loading state
-  if (loading) return <LoadingSpinner />
-  if (!center) return <NotFound />
+  // ---------------- UI ----------------
+  if (!shop) return <div className="p-6">Loading...</div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      {processingPayment && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full mx-4">
-            <div className="text-center">
-              <div className="w-12 h-12 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-              <p className="text-gray-800 font-medium mb-2">Processing Payment...</p>
-              <p className="text-gray-600 text-sm">Please complete the payment in the Razorpay window</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* HEADER SECTION */}
+      <div className="relative h-[300px] lg:h-[400px]">
+        <img 
+          src={shop.ProfileImage || "https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&q=80&w=1200&h=400"} 
+          alt={shop.ShopName} 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        
+        <div className="absolute top-6 left-6 flex gap-4">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition"
+          >
+            <ChevronLeft size={24} />
+          </button>
         </div>
-      )}
 
-      <div className="bg-white border-b shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-3">
-          <BackButton onClick={() => navigate(-1)} />
+        <div className="absolute bottom-10 left-6 right-6 lg:left-20 text-white">
+          <h1 className="text-4xl lg:text-5xl font-bold mb-3">{shop.ShopName}</h1>
+          <p className="flex items-center gap-2 opacity-90 text-lg">
+            <MapPin size={20} className="text-[#D4AF37]" /> {shop.ExactLocation}
+          </p>
         </div>
       </div>
->>>>>>> origin/master
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
-        {/* LEFT: Map + Heading */}
-        <div className="space-y-4">
-          <div className="bg-white p-4 rounded-xl shadow border">
-            <h1 className="text-2xl font-bold">{center.name}</h1>
-            <p className="flex items-center gap-1">
-              <MapPin size={16} /> {center.location}
-            </p>
-            <p className="flex items-center gap-1">
-              <Clock size={16} /> {center.hours}
-            </p>
-            <p className="font-medium mt-1">
-              {center.totalTime} | {center.price}
-            </p>
+      <div className="max-w-7xl mx-auto px-6 lg:px-20 -mt-8 relative z-10">
+        <div className="grid lg:grid-cols-3 gap-8">
+          
+          <div className="lg:col-span-2 space-y-8">
+            {/* VEHICLE TYPE SELECTOR */}
+            <div className="bg-white p-2 rounded-2xl shadow-xl flex gap-2">
+              {(['Bike', 'Car', 'Heavy Vehicle'] as const).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    setVehicleType(type);
+                    setSelectedServices([]);
+                  }}
+                  className={`flex-1 py-4 rounded-xl font-bold transition flex items-center justify-center gap-2 ${
+                    vehicleType === type
+                      ? 'bg-black text-white shadow-lg'
+                      : 'bg-transparent text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {type === 'Bike' && <Bike size={20} />}
+                  {type === 'Car' && <Car size={20} />}
+                  {type === 'Heavy Vehicle' && <Truck size={20} />}
+                  {type}
+                </button>
+              ))}
+            </div>
+
+            {/* SERVICES */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                Available Services for <span className="text-[#D4AF37]">{vehicleType}</span>
+              </h2>
+              <div className="grid gap-4">
+                {services
+                  .filter(s => s.vehicleType === vehicleType || (s as any).vehicleTypes?.includes(vehicleType))
+                  .map((service) => {
+                    const isSelected = selectedServices.some(s => s._id === service._id);
+                    return (
+                      <div
+                        key={service._id}
+                        onClick={() => toggleService(service)}
+                        className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex justify-between items-center group ${
+                          isSelected 
+                            ? 'border-black bg-gray-50' 
+                            : 'border-gray-100 hover:border-gray-200 bg-white'
+                        }`}
+                      >
+                        <div className="flex-1">
+                          <h3 className="font-bold text-lg mb-1 group-hover:text-black transition">{service.name}</h3>
+                          <p className="text-gray-500 text-sm mb-2">{service.description}</p>
+                          <div className="flex items-center gap-4 text-xs font-semibold text-gray-400">
+                            <span className="flex items-center gap-1"><Clock size={14} /> {service.duration} mins</span>
+                            <span className="text-black text-sm">₹{service.price}</span>
+                          </div>
+                        </div>
+                        {isSelected ? (
+                          <CheckCircle2 className="text-black" size={28} />
+                        ) : (
+                          <div className="w-7 h-7 rounded-full border-2 border-gray-200 group-hover:border-black transition" />
+                        )}
+                      </div>
+                    );
+                  })}
+                {services.filter(s => s.vehicleType === vehicleType || (s as any).vehicleTypes?.includes(vehicleType)).length === 0 && (
+                  <p className="text-center py-10 text-gray-400 bg-gray-50 rounded-2xl">No services available for this vehicle type yet.</p>
+                )}
+              </div>
+            </div>
+
+            {/* MAP */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 h-96">
+               <h2 className="text-2xl font-bold mb-4">Location</h2>
+               <div className="h-[calc(100%-40px)] rounded-xl overflow-hidden shadow-inner">
+                <MapContainer
+                  center={[shop.ExactLocationCoord.coordinates[1], shop.ExactLocationCoord.coordinates[0]]}
+                  zoom={15}
+                  className="h-full w-full"
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <Marker position={[shop.ExactLocationCoord.coordinates[1], shop.ExactLocationCoord.coordinates[0]]}>
+                    <Popup>{shop.ShopName}</Popup>
+                  </Marker>
+                </MapContainer>
+               </div>
+            </div>
           </div>
 
-          <div className="h-[300px] sm:h-[400px] lg:h-[550px] rounded-xl overflow-hidden relative z-0">
-            <MapContainer center={[center.lat, center.lng]} zoom={13} className="h-full w-full">
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Marker position={[center.lat, center.lng]}>
-                <Popup>{center.name}</Popup>
-              </Marker>
-            </MapContainer>
+          <div className="space-y-6">
+            <div className="bg-white p-8 rounded-2xl shadow-xl border-t-4 border-black sticky top-8">
+              <h2 className="text-2xl font-bold mb-6">Booking Details</h2>
+              <div className="mb-6">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Select Date</label>
+                <input 
+                  type="date" 
+                  value={date} 
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full p-4 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-black outline-none font-semibold"
+                />
+              </div>
+
+              <div className="mb-8">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 block">Available Slots</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {!date ? (
+                    <div className="col-span-2 py-4 text-center text-gray-400 text-sm">Please select a date first</div>
+                  ) : loadingSlots ? (
+                    <div className="col-span-2 py-4 text-center text-gray-400 italic">Finding slots...</div>
+                  ) : slots.length === 0 ? (
+                    <div className="col-span-2 py-4 text-center text-gray-400 text-sm">No slots available for this date</div>
+                  ) : (
+                    slots.map((slot) => (
+                      <button
+                        key={slot.time}
+                        disabled={slot.availableSlots === 0}
+                        onClick={() => setSelectedSlot(slot.time)}
+                        className={`py-3 px-2 rounded-xl border-2 text-sm font-bold transition-all ${
+                          selectedSlot === slot.time 
+                            ? 'bg-black border-black text-white shadow-lg' 
+                            : slot.availableSlots === 0 
+                              ? 'bg-gray-50 border-gray-50 text-gray-300 cursor-not-allowed line-through'
+                              : 'bg-white border-gray-100 hover:border-gray-200 text-gray-600'
+                        }`}
+                      >
+                        {slot.time}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4 border-t-2 border-dashed pt-6 mb-8">
+                <div className="flex justify-between text-gray-500">
+                  <span>Selected Services</span>
+                  <span className="font-bold text-black">{selectedServices.length}</span>
+                </div>
+                <div className="flex justify-between text-gray-500">
+                  <span>Total Duration</span>
+                  <span className="font-bold text-black">{totalDuration} mins</span>
+                </div>
+                <div className="h-px bg-gray-100 w-full" />
+                <div className="flex justify-between items-center">
+                  <span className="text-xl font-bold">Total Price</span>
+                  <span className="text-2xl font-extrabold text-[#D4AF37]">₹{totalPrice}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={handleBooking}
+                disabled={loading || !selectedSlot || !date || selectedServices.length === 0}
+                className={`w-full py-5 rounded-2xl font-black text-lg transition-all shadow-xl ${
+                  loading || !selectedSlot || !date || selectedServices.length === 0
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                    : 'bg-black text-white hover:bg-gray-900 active:scale-95'
+                }`}
+              >
+                {loading ? "Processing..." : "CONFIRM BOOKING"}
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* RIGHT: Booking Options */}
-        <div className="space-y-4">
-          {/* Vehicle */}
-          <div className="bg-white p-4 rounded-xl shadow border">
-            <label className="font-semibold">Vehicle Type</label>
-            <select
-              value={vehicle}
-              onChange={(e) => handleVehicleChange(e.target.value)}
-              className="w-full border p-2 rounded mt-1"
-            >
-              {center.vehicleTypes.map((v) => (
-                <option key={v}>{v}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Services - Filtered by Vehicle Type (slots removed) */}
-          <div className="bg-white p-4 rounded-xl shadow border">
-            <h2 className="font-bold mb-2">Select Services for {vehicle}</h2>
-
-            {filteredServices.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">No services available for this vehicle type</p>
-            ) : (
-              <div className="grid sm:grid-cols-2 gap-2">
-                {filteredServices.map((s) => (
-                  <label
-                    key={s.name}
-                    className={`border-2 p-3 rounded-lg cursor-pointer transition-all ${
-                      services.includes(s.name)
-                        ? "border-[#D4AF37] bg-[#FFF8DC]"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="flex gap-2 items-start">
-                      <input
-                        type="checkbox"
-                        checked={services.includes(s.name)}
-                        onChange={() => toggleService(s.name)}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium">{s.name}</div>
-                        <div className="text-sm text-gray-600">
-                          ₹{s.price} • {s.time} min
-                        </div>
-                      </div>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            <p className="mt-3 pt-3 border-t font-semibold">
-              Total: ₹{totalPrice} | {totalTime} min
-            </p>
-          </div>
-
-          {/* Date & Time - Now with available slots shown */}
-          <div className="bg-white p-4 rounded-xl shadow border">
-            <h2 className="font-bold mb-2">Choose Date & Time</h2>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full border p-2 rounded mb-3"
-            />
-
-            <h3 className="font-semibold mb-1">Morning Slots</h3>
-            <div className="flex gap-2 flex-wrap mb-3">
-              {center.timeSlots.morning.map((slot) => (
-                <button
-                  key={slot.time}
-                  onClick={() => setTime(slot.time)}
-                  disabled={slot.availableSlots === 0}
-                  className={`px-3 py-2 border rounded flex flex-col items-center min-w-[80px] ${
-                    time === slot.time
-                      ? "bg-[#D4AF37] text-white border-[#D4AF37]"
-                      : slot.availableSlots === 0
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "hover:border-[#D4AF37]"
-                  }`}
-                >
-                  <span className="font-medium">{slot.time}</span>
-                  <span
-                    className={`text-xs flex items-center gap-1 ${
-                      time === slot.time ? "text-white/80" : "text-green-600"
-                    }`}
-                  >
-                    <Users size={10} />
-                    {slot.availableSlots} slot{slot.availableSlots !== 1 ? "s" : ""}
-                  </span>
-                </button>
-              ))}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-6">
+          <div className="bg-white p-10 rounded-3xl w-full max-w-md text-center shadow-2xl scale-in-center">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="text-green-600" size={48} />
             </div>
-
-            <h3 className="font-semibold mb-1">Afternoon Slots</h3>
-            <div className="flex gap-2 flex-wrap">
-              {center.timeSlots.afternoon.map((slot) => (
-                <button
-                  key={slot.time}
-                  onClick={() => setTime(slot.time)}
-                  disabled={slot.availableSlots === 0}
-                  className={`px-3 py-2 border rounded flex flex-col items-center min-w-[80px] ${
-                    time === slot.time
-                      ? "bg-[#D4AF37] text-white border-[#D4AF37]"
-                      : slot.availableSlots === 0
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "hover:border-[#D4AF37]"
-                  }`}
-                >
-                  <span className="font-medium">{slot.time}</span>
-                  <span
-                    className={`text-xs flex items-center gap-1 ${
-                      time === slot.time ? "text-white/80" : "text-green-600"
-                    }`}
-                  >
-                    <Users size={10} />
-                    {slot.availableSlots} slot{slot.availableSlots !== 1 ? "s" : ""}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Service Type + Confirm */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div>
-              <h2 className="font-bold mb-2">Service Type</h2>
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => setServiceType("center")}
-                  className={`px-4 py-2 border rounded ${serviceType === "center" && "bg-[#FFF8DC]"}`}
-                >
-                  At Center
-                </button>
-
-                {center.pickAndDrop && (
-                  <button
-                    onClick={() => setServiceType("pickDrop")}
-                    className={`px-4 py-2 border rounded ${serviceType === "pickDrop" && "bg-[#FFF8DC]"}`}
-                  >
-                    Pick & Drop
-                  </button>
-                )}
-
-                {center.washAtHome && (
-                  <button
-                    onClick={() => setServiceType("home")}
-                    className={`px-4 py-2 border rounded ${serviceType === "home" && "bg-[#FFF8DC]"}`}
-                  >
-                    Wash at Home
-                  </button>
-                )}
-              </div>
-            </div>
-
+            <h3 className="text-3xl font-black mb-2">Booking Done!</h3>
+            <p className="text-gray-500 mb-8">Your car wash session has been scheduled successfully. We'll see you there!</p>
             <button
-              onClick={() =>
-                alert(
-                  `Booking Confirmed!\nDate: ${date}\nTime: ${time}\nVehicle: ${vehicle}\nServices: ${services.join(", ")}\nService Type: ${serviceType}\nTotal Time: ${totalTime} min\nTotal Amount: ₹${totalPrice}`,
-                )
-              }
-              className="bg-gradient-to-r from-[#D4AF37] to-[#b69530] text-white px-6 py-2 rounded font-bold whitespace-nowrap"
+              onClick={() => navigate("/history")}
+              className="w-full bg-black text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-gray-900 active:scale-95 transition"
             >
-              Confirm Booking
+              VIEW MY BOOKINGS
             </button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
-
-

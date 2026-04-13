@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { UserPlus } from "lucide-react";
 import { userRegister } from '../../Api/Auth';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Context/UserContext";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -14,18 +15,19 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    role: location.state?.role || "user",
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   // Redirect if already logged in
   useEffect(() => {
     if (token) {
-      navigate("/");
+      navigate(user?.role === "owner" ? "/owner" : "/home");
     }
-  }, [token, navigate]);
+  }, [token, user, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -97,13 +99,7 @@ export default function RegisterPage() {
       // Prepare data for API call (remove confirmPassword)
       const { confirmPassword, ...registerData } = formData;
       
-      // Add role if not provided (default to 'user' as per schema)
-      const dataToSend = {
-        ...registerData,
-        role: 'user' // Default role as per your schema
-      };
-
-      const response = await userRegister(dataToSend);
+      const response = await userRegister(registerData);
       console.log("Registration successful:", response);
       
       // Check response structure
@@ -145,6 +141,7 @@ export default function RegisterPage() {
       email: "",
       password: "",
       confirmPassword: "",
+      role: "user",
     });
     setError("");
     setSuccess("");
@@ -161,6 +158,30 @@ export default function RegisterPage() {
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4 sm:mb-6">
             Create Account
           </h2>
+
+          {/* User / Owner Toggle */}
+          <div className="flex bg-gray-100 p-1 rounded-lg mb-6 sticky">
+            <button
+              onClick={() => setFormData(prev => ({ ...prev, role: "user" }))}
+              className={`flex-1 py-1.5 text-xs font-medium rounded-md transition ${
+                formData.role === "user"
+                  ? "bg-white shadow text-gray-800"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              User Registration
+            </button>
+            <button
+              onClick={() => setFormData(prev => ({ ...prev, role: "owner" }))}
+              className={`flex-1 py-1.5 text-xs font-medium rounded-md transition ${
+                formData.role === "owner"
+                  ? "bg-white shadow text-gray-800"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Owner Registration
+            </button>
+          </div>
           <div className="space-y-3 sm:space-y-4">
             {/* NAME FIELDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -335,9 +356,9 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
-      <footer className="w-full text-center text-xs sm:text-sm text-gray-600 py-2 sm:py-3 bg-gray-100 shrink-0">
+      {/* <footer className="w-full text-center text-xs sm:text-sm text-gray-600 py-2 sm:py-3 bg-gray-100 shrink-0">
         © {new Date().getFullYear()} MyCarWash. All rights reserved.
-      </footer>
+      </footer> */}
     </div>
   );
 }

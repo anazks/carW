@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface Booking {
   _id: string;
-  shopId: string;
-  barberName: string;
+  shopName: string;
   bookingDate: string;
   startTime: string;
   endTime: string;
@@ -99,6 +98,7 @@ export default function History() {
       
       const response = await getBookingHistory();
       console.log('Fetched booking history response:', response);
+      
       if (response.status === 200 && response.data?.success) {
         setBookings(response.data.bookings || []);
       } else {
@@ -125,7 +125,7 @@ export default function History() {
   }, [bookings]);
 
   const handleBookNow = () => {
-    navigate('/shops'); // Navigate to shops page
+    navigate('/home'); // Navigate to home page where shops are listed
   };
 
   const handleViewReceipt = (bookingId: string) => {
@@ -231,7 +231,7 @@ export default function History() {
                         className="text-xl font-bold text-gray-900"
                         style={{ fontFamily: "'Bodoni Moda', serif" }}
                       >
-                        {booking.barberName || 'Barber Shop'}
+                        {booking.shopName || 'Car Wash Shop'}
                       </h2>
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-gray-600 mt-1">
                         <div className="flex items-center gap-2">

@@ -226,7 +226,7 @@ export default function Register() {
             {/* LINK TO LOGIN */}
             <div className="text-center">
               <button
-                onClick={() => navigate("/owner-login")}
+                onClick={() => navigate("/owner/login")}
                 className="text-[#D4AF37] font-medium text-xs underline hover:opacity-80"
               >
                 Already have an account? Login

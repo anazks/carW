@@ -11,9 +11,10 @@ import {
   CheckCircle,
   Crown,
   Image as ImageIcon,
+  Trash2,
 } from "lucide-react";
 import OwnerNavbar from "../Layout/OwnerNavBar";
-import { getProfileShop, getmyshops } from '../../../Api/Service'; // Added: Import updateShopProfile (assume it exists)
+import { getProfileShop, getmyshops, deleteShop } from '../../../Api/Service';
 
 /* ================= TYPES ================= */
 interface OwnerInfo {
@@ -29,18 +30,18 @@ interface OwnerInfo {
 
 interface Shop {
   _id: string;
-  shopName: string;
-  city: string;
-  exactLocation: string;
-  exactLocationCoord: {
+  ShopName: string;
+  City: string;
+  ExactLocation: string;
+  ExactLocationCoord: {
     type: string;
     coordinates: [number, number]; // [lng, lat]
   };
-  isPremium: boolean;
-  mobile: number | string;
-  profileImage: string;
-  shopOwnerId: string;
-  timing: string;
+  IsPremium: boolean;
+  Mobile: number | string;
+  ProfileImage: string;
+  ShopOwnerId: string;
+  Timing: string;
   createdAt: string;
   media: any[];
   updatedAt: string;
@@ -64,8 +65,10 @@ export default function OwnerProfile() {
   const [shop, setShop] = useState<Shop | null>(null); // State for single shop object
 
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true); // For initial fetch
-  const [saveLoading, setSaveLoading] = useState(false); // For save action
+  const [loading, setLoading] = useState(true);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -81,11 +84,15 @@ export default function OwnerProfile() {
       console.log("My Shops Data-----------------------: ", res);
       
       if (res.success) {
-        console.log("My Shop Object:**** ", res.data);
-        setShop(res.data); // Set single shop object
-        // Optionally, set default shopName from shop
-        if (res.data && !ownerInfo.shopName) {
-          setOwnerInfo(prev => ({ ...prev, shopName: res.data.shopName || '' }));
+        console.log("My Shops Data: ", res.data);
+        // Backend returns an array, take the first shop
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          const firstShop = res.data[0];
+          setShop(firstShop);
+          setOwnerInfo(prev => ({ ...prev, shopName: firstShop.shopName || prev.shopName }));
+        } else if (res.data && !Array.isArray(res.data)) {
+          setShop(res.data);
+          setOwnerInfo(prev => ({ ...prev, shopName: res.data.shopName || prev.shopName }));
         }
       } else {
         setError(res.message || "Failed to fetch shop");
@@ -125,6 +132,28 @@ export default function OwnerProfile() {
       setError(err.message || "An error occurred while fetching profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  /* ================= DELETE SHOP ================= */
+  const handleDeleteShop = async () => {
+    if (!shop?._id) return;
+    try {
+      setDeleteLoading(true);
+      setError(null);
+      const res = await deleteShop(shop._id);
+      if (res.success) {
+        setShop(null);
+        setConfirmDelete(false);
+        setSuccess("Wash center deleted successfully.");
+      } else {
+        setError(res.message || "Failed to delete shop.");
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || "Failed to delete shop.");
+    } finally {
+      setDeleteLoading(false);
+      setConfirmDelete(false);
     }
   };
 
@@ -261,10 +290,10 @@ export default function OwnerProfile() {
             {shop ? (
               <div className="border rounded-lg p-4 bg-gray-50 hover:shadow-md transition-shadow">
                 {/* Profile Image */}
-                {shop.profileImage ? (
+                {shop.ProfileImage ? (
                   <img 
                     src={shop.ProfileImage} 
-                    alt={shop.shopName}
+                    alt={shop.ShopName}
                     className="w-full h-48 md:h-64 object-cover rounded-lg mb-3"
                     onError={(e) => { e.currentTarget.style.display = 'none'; }} // Hide if broken
                   />
@@ -279,13 +308,13 @@ export default function OwnerProfile() {
                 
                 {/* Location */}
                 <p className="text-sm text-gray-600 mb-1 flex items-center gap-1">
-                  <MapPin size={14} /> {shop.City}, {shop.exactLocation}
+                  <MapPin size={14} /> {shop.City}, {shop.ExactLocation}
                 </p>
                 
                 {/* Coordinates (Optional: Show if needed) */}
-                {shop.exactLocationCoord && (
-                  <p className="text-xs text-gray-500 mb-1">
-                    Coords: [{shop.exactLocationCoord.coordinates[1].toFixed(4)}, {shop.exactLocationCoord.coordinates[0].toFixed(4)}]
+                {shop.ExactLocationCoord && (
+                  <p className="text-sm text-gray-500 mb-1">
+                    Coords: [{shop.ExactLocationCoord.coordinates[1].toFixed(4)}, {shop.ExactLocationCoord.coordinates[0].toFixed(4)}]
                   </p>
                 )}
                 
@@ -311,7 +340,7 @@ export default function OwnerProfile() {
                 </p>
                 
                 {/* Premium Badge */}
-                {shop.isPremium && (
+                {shop.IsPremium && (
                   <div className="flex items-center gap-1 text-xs text-yellow-600 mb-2">
                     <Crown size={12} /> Premium
                   </div>
@@ -338,10 +367,21 @@ export default function OwnerProfile() {
                   </p>
                 )}
                 
-                {/* Shop ID & Version (Optional: For dev/debug) */}
+                {/* Shop ID & Version */}
                 <p className="text-xs text-gray-400 mt-2">
                   ID: {shop._id} | v{shop.__v}
                 </p>
+
+                {/* DELETE BUTTON */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => setConfirmDelete(true)}
+                    className="flex items-center gap-2 text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg transition font-semibold text-sm"
+                  >
+                    <Trash2 size={16} />
+                    Delete This Wash Center
+                  </button>
+                </div>
               </div>
             ) : (
               <p className="text-sm text-gray-500">No shop found. Add your first shop to get started.</p>
@@ -414,6 +454,37 @@ export default function OwnerProfile() {
             )}
           </div>
         </div>
+
+        {/* DELETE CONFIRMATION MODAL */}
+        {confirmDelete && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
+            <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-red-100">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-600 mb-4 mx-auto">
+                <AlertCircle size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Delete Wash Center?</h3>
+              <p className="text-sm text-gray-500 text-center mb-6">
+                This action cannot be undone. All services and bookings for <b>{shop?.ShopName || 'this shop'}</b> will be permanently removed.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  disabled={deleteLoading}
+                  onClick={handleDeleteShop}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
+                >
+                  {deleteLoading ? <Loader2 className="animate-spin" size={18} /> : <> <Trash2 size={18} /> Delete Everything</>}
+                </button>
+                <button
+                  disabled={deleteLoading}
+                  onClick={() => setConfirmDelete(false)}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* FOOTER */}
         <footer className="mt-6 w-full text-center text-sm text-gray-600 py-3 bg-gray-100">

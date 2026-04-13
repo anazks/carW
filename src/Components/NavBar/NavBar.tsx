@@ -10,24 +10,16 @@ import {
   LogOut,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../Context/UserContext"; // Added: Import auth context
-
-/* ================= TYPES ================= */
-type UserType = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-};
+import { useAuth } from "../../Context/UserContext";
+// import path from "path";
 
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  // Removed: Local user/loading state—now using context
-
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, loading: authLoading } = useAuth(); // Added: Destructure from context
+
+  const { token, user, logout, loading: authLoading } = useAuth();
 
   /* ================= SCROLL EFFECT ================= */
   useEffect(() => {
@@ -38,26 +30,37 @@ export default function NavBar() {
 
   /* ================= LOGOUT ================= */
   const handleLogout = () => {
-    logout(); // Updated: Use context logout for full cleanup (token, user, etc.)
+    logout();
     navigate("/login");
   };
 
   /* ================= NAV LINKS ================= */
   const baseNavLinks = [
-    { path: "/", label: "Home", icon: Home },
-    // { path: "/services", label: "Services", icon: Droplet },
+    { path: "/home", label: "Home", icon: Home },
+    { path: "/services", label: "Services", icon: Droplet },
   ];
 
-  const userNavLinks = user
+  const userNavLinks = token && !user?.role || user?.role === 'user'
     ? [
         { path: "/history", label: "History", icon: History },
         { path: "/profile", label: "Profile", icon: User },
       ]
     : [];
 
-  const navLinks = [...baseNavLinks, ...userNavLinks];
+  const ownerNavLinks = token && user?.role === 'owner'
+    ? [
+        { path: "/owner", label: "Dashboard", icon: Home },
+        { path: "/owner/bookings", label: "Bookings", icon: History },
+        { path: "/owner/services", label: "My Services", icon: Droplet },
+        { path: "/owner/profile", label: "Shop Profile", icon: User },
+      ]
+    : [];
 
-  const isActive = (path: string) => location.pathname === path;
+  const navLinks = [...baseNavLinks, ...userNavLinks, ...ownerNavLinks];
+
+  /* ================= ACTIVE ROUTE CHECK ================= */
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(path + "/");
 
   /* ================= LOADING STATE ================= */
   if (authLoading) {
@@ -68,20 +71,21 @@ export default function NavBar() {
     <>
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          scrolled ? "bg-white shadow-lg py-2" : "bg-white py-2"
+          scrolled ? "bg-white shadow-lg py-2" : "bg-white py-3"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center">
 
-            {/* ================= LOGO ================= */}
+            {/* LOGO */}
             <div
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/home")}
               className="flex items-center space-x-3 cursor-pointer"
             >
               <div className="bg-gradient-to-br from-[#D4AF37] to-[#FFD700] p-2 rounded-full">
                 <Droplet className="w-6 h-6 text-white" fill="white" />
               </div>
+
               <div>
                 <h1
                   style={{ fontFamily: "'Bodoni Moda', serif" }}
@@ -89,13 +93,18 @@ export default function NavBar() {
                 >
                   Mycarwash
                 </h1>
-                <p className="text-xs text-gray-500 -mt-1">
+                  <h1>
+                      {
+                        token ? "" : ""
+                      }
+                    </h1>
+                <p className="text-xs text-gray-500 -mt- 1">
                   Premium Car Wash
                 </p>
               </div>
             </div>
 
-            {/* ================= DESKTOP NAV ================= */}
+            {/* DESKTOP NAV */}
             <div className="hidden lg:flex space-x-1">
               {navLinks.map((link) => {
                 const Icon = link.icon;
@@ -107,7 +116,7 @@ export default function NavBar() {
                     onClick={() => navigate(link.path)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
                       active
-                        ? "text-[#D4AF37] bg-[#FFF8DC]"
+                        ? "text-[#D4AF37] bg-[#FFF8DC] font-semibold"
                         : "text-gray-700 hover:bg-[#FFF8DC]"
                     }`}
                   >
@@ -118,28 +127,33 @@ export default function NavBar() {
               })}
             </div>
 
-            {/* ================= DESKTOP RIGHT ================= */}
+            {/* DESKTOP RIGHT */}
             <div className="hidden lg:flex gap-3 items-center">
-              {user ? (
+
+              {token ? (
                 <>
-                  <span className="text-gray-700 font-medium">
-                    {user.firstName} {user.lastName} {/* Now shows from context */}
-                  </span>
+                  {user && (
+                    <span className="text-gray-700 font-medium">
+                      {user.firstName || ""} {user.lastName || ""}
+                    </span>
+                  )}
 
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-1 px-4 py-2 text-gray-700 hover:text-red-500"
+                    className="flex items-center gap-1 px-4 py-2 text-gray-700 hover:text-red-500 font-medium"
                   >
                     <LogOut className="w-4 h-4" />
                     Logout
                   </button>
-
-                  <button
-                    onClick={() => navigate("/services")}
-                    className="px-6 py-2 bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-white rounded-lg font-semibold"
-                  >
-                    Book Now
-                  </button>
+                  
+                  {user?.role !== 'owner' && user?.role !== 'admin' && (
+                    <button
+                      onClick={() => navigate("/services")}
+                      className="px-6 py-2 bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-white rounded-lg font-semibold hover:opacity-90 transition"
+                    >
+                      Book Now
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
@@ -153,7 +167,7 @@ export default function NavBar() {
 
                   <button
                     onClick={() => navigate("/services")}
-                    className="px-6 py-2 bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-white rounded-lg font-semibold"
+                    className="px-6 py-2 bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-white rounded-lg font-semibold hover:opacity-90 transition"
                   >
                     Book Now
                   </button>
@@ -161,19 +175,21 @@ export default function NavBar() {
               )}
             </div>
 
-            {/* ================= MOBILE MENU BUTTON ================= */}
+            {/* MOBILE MENU BUTTON */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="lg:hidden p-2"
             >
               {isOpen ? <X /> : <Menu />}
             </button>
+
           </div>
         </div>
 
-        {/* ================= MOBILE MENU ================= */}
+        {/* MOBILE MENU */}
         {isOpen && (
           <div className="lg:hidden bg-white px-4 pb-4 border-t">
+
             {navLinks.map((link) => (
               <button
                 key={link.path}
@@ -181,17 +197,24 @@ export default function NavBar() {
                   navigate(link.path);
                   setIsOpen(false);
                 }}
-                className="block w-full text-left px-4 py-3 rounded-lg hover:bg-[#FFF8DC]"
+                className={`block w-full text-left px-4 py-3 rounded-lg transition ${
+                  isActive(link.path)
+                    ? "bg-[#FFF8DC] text-[#D4AF37] font-semibold"
+                    : "hover:bg-[#FFF8DC]"
+                }`}
               >
                 {link.label}
               </button>
             ))}
 
-            {user ? (
+            {token ? (
               <>
-                <div className="px-4 py-2 text-sm text-gray-600 border-t">
-                  Welcome, {user.firstName} {/* Now shows from context */}
-                </div>
+                {user && (
+                  <div className="px-4 py-2 text-sm text-gray-600 border-t">
+                    Welcome,
+                     {user.firstName || "User"}
+                  </div>
+                )}
 
                 <button
                   onClick={() => {
@@ -218,7 +241,7 @@ export default function NavBar() {
         )}
       </nav>
 
-      {/* OFFSET FOR FIXED NAV */}
+      {/* NAVBAR OFFSET */}
       <div className="pt-20" />
     </>
   );

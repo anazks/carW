@@ -1,25 +1,27 @@
 "use client"
 
 import { useState } from "react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { LogOut, Home, Calendar, User, Clock } from "lucide-react"
+import { Link, useLocation } from "react-router-dom"
+import { LogOut, Home, Calendar, User, Clock, Plus } from "lucide-react"
+import { useAuth } from "../../../Context/UserContext"
 
 export default function OwnerNavBar() {
-  const navigate = useNavigate()
   const location = useLocation()
+  const { logout } = useAuth()
 
   const [menuOpen, setMenuOpen] = useState(false)
 
   const navItems = [
     { label: "Dashboard", path: "/owner", icon: <Home size={16} /> },
+    { label: "Add Shop", path: "/owner/addShop", icon: <Plus size={16} /> },
     { label: "Services", path: "/owner/services", icon: <User size={16} /> },
-    { label: "Time Slots", path: "/owner/TimeSlots", icon: <Clock size={16} /> },
+    // { label: "Time Slots", path: "/owner/TimeSlots", icon: <Clock size={16} /> },
     { label: "Bookings", path: "/owner/bookings", icon: <Calendar size={16} /> },
     { label: "Profile", path: "/owner/profile", icon: <User size={16} /> },
   ]
 
   const handleLogout = () => {
-    navigate("/owner/login")
+    logout()
   }
 
   return (
