@@ -1,61 +1,46 @@
 import axios from "axios";
-import BaseURL from '../Static/Static';
-import CryptoJS from "crypto-js";
 
-const SECRET_KEY = "your_secret_key_123";
-
-// Create axios instance
+// ✅ Create axios instance
 const instance = axios.create({
-  baseURL: BaseURL,
+  baseURL: "http://localhost:8081",
 });
-console.log("Axios Base URL:", BaseURL);
-// Request interceptor to add token to all requests
+
+/* ================= REQUEST INTERCEPTOR ================= */
 instance.interceptors.request.use(
   (config) => {
-    // Try to get token from localStorage
     try {
-      const encryptedToken = localStorage.getItem("token");
-      
-      if (encryptedToken) {
-        // Decrypt the token
-        const decryptedToken = CryptoJS.AES.decrypt(
-          encryptedToken, 
-          SECRET_KEY
-        ).toString(CryptoJS.enc.Utf8);
-        
-        // Add token to headers if it exists
-        if (decryptedToken) {
-          config.headers.Authorization = `Bearer ${decryptedToken}`;
-        }
+      const token = localStorage.getItem("token");
+
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (error) {
-      console.error("Error processing token for request:", error);
-      // Continue with request even if token handling fails
+      console.error("Token setup failed:", error);
     }
-    
+
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Optional: Add response interceptor to handle token errors (like expired tokens)
+/* ================= RESPONSE INTERCEPTOR ================= */
 instance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    // Handle 401 Unauthorized errors (expired or invalid tokens)
-    if (error.response && error.response.status === 401) {
-      // Clear invalid token
+    // ✅ Handle unauthorized (token expired)
+    if (error.response?.status === 401) {
+      console.log("Session expired. Clearing auth data...");
+
       localStorage.removeItem("token");
-      
-      // Redirect to login page or show notification
-      // window.location.href = '/login';
-      console.log("Token expired or invalid. Please login again.");
+      localStorage.removeItem("user");
+
+      // Remove from axios defaults
+      delete axios.defaults.headers.common["Authorization"];
+
+      // Let the UserContext handle the redirect instead of forcing it here
+      // This prevents multiple redirects and page refreshes
     }
-    
+
     return Promise.reject(error);
   }
 );

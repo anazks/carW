@@ -50,7 +50,7 @@ export const getAvailbleSlots = async (shopId: string, bookingDate: string) => {
     let data = { shopId, bookingDate };
     const response = await Axios.post("/booking/fetchAllAvailableTimeSlots", data);
     console.log("API response for available slots:", response);
-    return response; // { success, message, data }
+    return response.data; // { success, message, data }
   } catch (error) {
     console.error("Error fetching available slots:", error);
     throw error;

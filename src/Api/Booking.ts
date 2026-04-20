@@ -46,3 +46,27 @@ export const getBookingHistory = async () => {
         throw error;
     }
 }
+
+export const getOwnerBookings = async () => {
+    try {
+        const response = await Axios.get(`${API_BASE_URL}/ownerBookings`);
+        console.log('API response for owner bookings:', response.data);
+        return response; // { success, message, bookings }
+    } catch (error) {
+        console.error('Error fetching owner bookings:', error);
+        throw error;
+    }
+}
+
+export const updateBookingStatus = async (bookingId: string, status: string) => {
+    try {
+        const response = await Axios.put(`${API_BASE_URL}/updateStatus/${bookingId}`, {
+            bookingStatus: status
+        });
+        console.log('API response for update status:', response.data);
+        return response; // { success, message }
+    } catch (error) {
+        console.error('Error updating booking status:', error);
+        throw error;
+    }
+}

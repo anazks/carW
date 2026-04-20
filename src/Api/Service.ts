@@ -12,6 +12,17 @@ export const AddService  = async (data:any)=>{
     }
 }
 
+export const deleteShop = async (shopId: string) => {
+    try {
+        const response = await Axios.delete(`${BASE_URL}/deleteShop/${shopId}`);
+        return response.data; // { success, message }
+    } catch (error) {
+        console.error('Error deleting shop:', error);
+        throw error;
+    }
+}
+
+
 export const addnewShop = async (data:any)=>{
     try {
         const response = await Axios.post(`${BASE_URL}/addShop`,data);
@@ -28,6 +39,16 @@ export const getProfileShop = async ()=>{
         return response.data; // { success, message, data }
     } catch (error) {
         console.error('Error fetching profile shop:', error);
+        throw error;
+    }
+}
+
+export const deleteService = async (serviceId: string) => {
+    try {
+        const response = await Axios.delete(`${BASE_URL}/deleteService/${serviceId}`);
+        return response.data; // { success, message }
+    } catch (error) {
+        console.error('Error deleting service:', error);
         throw error;
     }
 }
